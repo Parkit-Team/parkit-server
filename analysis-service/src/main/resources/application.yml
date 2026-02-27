@@ -27,3 +27,9 @@ logging:
     com.parkit.analysis: DEBUG
     org.springframework.data.redis: INFO
     org.springframework.kafka: INFO
+
+springdoc:
+  swagger-ui:
+    path: /swagger-ui.html
+  api-docs:
+    path: /v3/api-docs
