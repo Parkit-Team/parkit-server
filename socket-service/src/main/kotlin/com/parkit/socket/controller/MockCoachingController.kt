@@ -1,17 +1,10 @@
 package com.parkit.socket.controller
 
+import com.parkit.socket.dto.CoachingData
 import org.springframework.messaging.simp.SimpMessagingTemplate
 import org.springframework.scheduling.annotation.EnableScheduling
 import org.springframework.scheduling.annotation.Scheduled
 import org.springframework.stereotype.Controller
-
-data class CoachingData(
-    val sensorId: String,
-    val distance: Double,
-    val warningLevel: String,
-    val message: String,
-    val timestamp: Long
-)
 
 @Controller
 @EnableScheduling
