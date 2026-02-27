@@ -1,0 +1,20 @@
+server:
+  port: 8082
+
+spring:
+  application:
+    name: socket-service
+
+  kafka:
+    bootstrap-servers: localhost:9092
+    consumer:
+      group-id: socket-group
+      auto-offset-reset: latest
+      key-deserializer: org.apache.kafka.common.serialization.StringDeserializer
+      value-deserializer: org.apache.kafka.common.serialization.StringDeserializer
+
+logging:
+  level:
+    root: INFO
+    com.parkit.socket: DEBUG
+    org.springframework.kafka: INFO
