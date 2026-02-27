@@ -1,0 +1,105 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Parkit WebSocket STOMP Test Client</title>
+    <!-- SockJS and STOMP.js Libraries -->
+    <script src="https://cdn.jsdelivr.net/npm/sockjs-client@1/dist/sockjs.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/stomp.js/2.3.3/stomp.min.js"></script>
+    <style>
+        body { font-family: Arial, sans-serif; margin: 20px; }
+        #messages { border: 1px solid #ccc; padding: 10px; height: 300px; overflow-y: scroll; margin-top: 10px; background: #f9f9f9; }
+        .message-item { margin-bottom: 8px; padding-bottom: 8px; border-bottom: 1px solid #eee; }
+        .SAFE { color: green; font-weight: bold; }
+        .WARNING { color: orange; font-weight: bold; }
+        .DANGER { color: red; font-weight: bold; }
+        button { padding: 10px 15px; margin-right: 10px; cursor: pointer; }
+        #status { font-weight: bold; margin-bottom: 15px; }
+        .connected { color: green; }
+        .disconnected { color: red; }
+    </style>
+</head>
+<body>
+
+    <h2>🚗 Parkit WebSocket (STOMP) Test Monitor</h2>
+    <div id="status" class="disconnected">Status: Disconnected</div>
+    
+    <div>
+        <button id="connectBtn" onclick="connect()">Connect</button>
+        <button id="disconnectBtn" onclick="disconnect()" disabled>Disconnect</button>
+        <button onclick="clearMessages()">Clear</button>
+    </div>
+
+    <div id="messages"></div>
+
+    <script>
+        let stompClient = null;
+
+        function connect() {
+            // Spring Boot 서버의 STOMP 엔드포인트 주소
+            const socket = new SockJS('http://localhost:8082/ws/parkit');
+            stompClient = Stomp.over(socket);
+
+            // STOMP 디버그 로그 비활성화 원하면 아래 줄 주석 해제
+            // stompClient.debug = null;
+
+            document.getElementById('status').innerText = 'Status: Connecting...';
+            document.getElementById('status').className = 'WARNING';
+
+            stompClient.connect({}, function (frame) {
+                document.getElementById('status').innerText = 'Status: Connected';
+                document.getElementById('status').className = 'connected';
+                document.getElementById('connectBtn').disabled = true;
+                document.getElementById('disconnectBtn').disabled = false;
+
+                console.log('Connected: ' + frame);
+
+                // 서버가 보내주는 Topic(/topic/coaching)을 구독(Subscribe)
+                stompClient.subscribe('/topic/coaching', function (response) {
+                    const data = JSON.parse(response.body);
+                    showMessage(data);
+                });
+            }, function (error) {
+                console.error('STOMP Error:', error);
+                document.getElementById('status').innerText = 'Status: Error! (Check console)';
+                document.getElementById('status').className = 'disconnected';
+            });
+        }
+
+        function disconnect() {
+            if (stompClient !== null) {
+                stompClient.disconnect();
+            }
+            document.getElementById('status').innerText = 'Status: Disconnected';
+            document.getElementById('status').className = 'disconnected';
+            document.getElementById('connectBtn').disabled = false;
+            document.getElementById('disconnectBtn').disabled = true;
+            console.log("Disconnected");
+        }
+
+        function showMessage(data) {
+            const messagesDiv = document.getElementById('messages');
+            const messageElement = document.createElement('div');
+            messageElement.className = 'message-item';
+            
+            const timestamp = new Date(data.timestamp).toLocaleTimeString();
+            
+            messageElement.innerHTML = `
+                <strong>[${timestamp}]</strong> 
+                <span class="${data.warningLevel}">${data.warningLevel}</span> | 
+                Sensor: ${data.sensorId} | 
+                Distance: ${data.distance.toFixed(2)} cm | 
+                Message: ${data.message}
+            `;
+            
+            // 최신 메시지가 위로 오게 추가
+            messagesDiv.insertBefore(messageElement, messagesDiv.firstChild);
+        }
+
+        function clearMessages() {
+            document.getElementById('messages').innerHTML = '';
+        }
+    </script>
+</body>
+</html>

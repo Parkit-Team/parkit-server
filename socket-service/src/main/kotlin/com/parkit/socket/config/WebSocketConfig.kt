@@ -22,5 +22,6 @@ class WebSocketConfig : WebSocketMessageBrokerConfigurer {
         // 클라이언트가 연결할 STOMP 엔드포인트: /ws/parkit
         registry.addEndpoint("/ws/parkit")
             .setAllowedOriginPatterns("*") // 실제 운영 시에는 프론트엔드 도메인으로 제한
+            .withSockJS() // SockJS 폴백 옵션 활성화
     }
 }
