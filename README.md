@@ -82,3 +82,14 @@
 프로젝트 초기에 각 인터페이스 간의 협의가 팀 진행 속도에 지대한 영향을 미칩니다.
 1. **`sensor-raw` (Kafka Topic)**: 1번 팀에서 발행, 2번 팀에서 소비합니다. 데이터 스키마(예: `{ "sensor_id": 1, "distance": 15.2, "timestamp": ... }`)를 1~2일차에 최우선적으로 픽스해야 합니다.
 2. **`WebSocket (STOMP)`**: 2번 팀에서 송신, 3번 팀에서 수신합니다. 3번 팀이 지연 없이 프론트엔드를 찍어 낼 수 있도록, 2번 팀은 2~3일차 이내에 STOMP 엔드포인트명과 전달 데이터 포맷(예: 경고 레벨, 텍스트 메시지)을 정리해 공유해야 합니다.
+
+
+## ✅ 개발 규칙
+### 1. 브랜치 전략
+- `feature/{작업명}` (예: `feature/analysis-consumer`)
+- `fix/{버그명}` (예: `fix/websocket-cors`)
+- `infra/{작업명}` (예: `infra/setup-redis`)
+ 
+### 2. Pull Request 및 리뷰
+- PR 본문에는 **변경 내용, 체크리스트, 리뷰 포인트** 작성
+- 병합 시에는 Squash and Merge 를 사용
