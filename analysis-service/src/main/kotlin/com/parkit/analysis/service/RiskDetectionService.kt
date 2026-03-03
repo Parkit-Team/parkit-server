@@ -12,7 +12,7 @@ class RiskDetectionService {
      * Kafka에서 수신한 ParkingSensorEvent를 처리하여 실시간 위험을 감지합니다.
      */
     fun processEvent(event: ParkingSensorEvent) {
-        log.info("Processing ParkingSensorEvent for sensorId: ${event.sensorId}, distance: ${event.distance}")
+        log.info("Processing ParkingSensorEvent for sensorId: {}, distance: {}", event.sensorId, event.distance)
         // TODO: 실시간 위험 감지 알고리즘 로직 구현 예정
     }
 }

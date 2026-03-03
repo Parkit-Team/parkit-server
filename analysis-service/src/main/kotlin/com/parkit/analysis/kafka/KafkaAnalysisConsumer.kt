@@ -1,6 +1,7 @@
 package com.parkit.analysis.kafka
 
 import com.fasterxml.jackson.databind.ObjectMapper
+import com.fasterxml.jackson.module.kotlin.readValue
 import com.parkit.analysis.dto.ParkingSensorEvent
 import com.parkit.analysis.service.RiskDetectionService
 import org.slf4j.LoggerFactory
@@ -23,7 +24,7 @@ class KafkaAnalysisConsumer(
             log.debug("Received Kafka message: {}", message)
             
             // 수신 된 JSON 페이로드를 ParkingSensorEvent 객체로 역직렬화
-            val event = objectMapper.readValue(message, ParkingSensorEvent::class.java)
+            val event = objectMapper.readValue<ParkingSensorEvent>(message)
             
             // 해당 이벤트를 RiskDetectionService로 전달하여 처리
             riskDetectionService.processEvent(event)
