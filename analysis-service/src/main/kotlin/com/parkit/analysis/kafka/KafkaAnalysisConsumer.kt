@@ -18,14 +18,15 @@ class KafkaAnalysisConsumer(
     /**
      * 타겟 토픽(sensor-raw)을 구독
      */
-    @KafkaListener(topics = ["sensor-raw"], groupId = "analysis-service-group")
+    @KafkaListener(topics = ["parking-topic"], groupId = "analysis-group")
     fun consume(message: String) {
         try {
-            log.debug("Received Kafka message: {}", message)
-            
             // 수신 된 JSON 페이로드를 ParkingSensorEvent 객체로 역직렬화
             val event = objectMapper.readValue<ParkingSensorEvent>(message)
-            
+
+            println("✅ 수신된 주차 데이터: ${event.status} | 메시지: ${event.msg}")
+            log.debug("Received Kafka message: {}", message)
+
             // 해당 이벤트를 RiskDetectionService로 전달하여 처리
             riskDetectionService.processEvent(event)
             

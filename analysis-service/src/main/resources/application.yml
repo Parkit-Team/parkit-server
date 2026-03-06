@@ -11,7 +11,9 @@ spring:
       port: 6379
 
   kafka:
-    bootstrap-servers: localhost:9092
+    bootstrap-servers: 127.0.0.1:9092
+    properties:
+      api.version.request: true
     consumer:
       group-id: analysis-group
       auto-offset-reset: latest
@@ -27,6 +29,7 @@ logging:
     com.parkit.analysis: DEBUG
     org.springframework.data.redis: INFO
     org.springframework.kafka: INFO
+    org.apache.kafka: INFO
 
 springdoc:
   swagger-ui:

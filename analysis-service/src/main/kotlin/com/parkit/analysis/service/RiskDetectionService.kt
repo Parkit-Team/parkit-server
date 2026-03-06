@@ -25,7 +25,7 @@ class RiskDetectionService(
      * Kafka에서 수신한 ParkingSensorEvent를 통해 실시간 위험을 판단하고 알림을 발행
      */
     fun processEvent(event: ParkingSensorEvent) {
-        log.info("Processing ParkingSensorEvent for sensorId: {}, distance: {}", event.sensorId, event.distance)
+        log.info("Processing ParkingSensorEvent - status: {}, msg: {}", event.status, event.msg)
         
         val alertEvent = detectRisk(event)
         
@@ -39,21 +39,25 @@ class RiskDetectionService(
      * 거리 데이터를 기반으로 코칭 이벤트 반환
      */
     fun detectRisk(event: ParkingSensorEvent): CoachingAlertEvent? {
+        // 임시로 msg 필드의 값을 Double(거리)로 파싱 시도
+        val parsedDistance = event.msg.toDoubleOrNull() ?: return null
+        val tempSensorId = 1 // 임시 센서 ID 부여
+
         return when {
-            event.distance < DANGER_THRESHOLD -> CoachingAlertEvent(
-                sensorId = event.sensorId,
+            parsedDistance < DANGER_THRESHOLD -> CoachingAlertEvent(
+                sensorId = tempSensorId,
                 level = CoachingLevel.DANGER,
                 message = "충돌 위험! 정지하세요",
                 timestamp = System.currentTimeMillis()
             )
-            event.distance <= WARNING_THRESHOLD -> CoachingAlertEvent(
-                sensorId = event.sensorId,
+            parsedDistance <= WARNING_THRESHOLD -> CoachingAlertEvent(
+                sensorId = tempSensorId,
                 level = CoachingLevel.WARNING,
                 message = "장애물이 가까워집니다. 속도를 줄이세요",
                 timestamp = System.currentTimeMillis()
             )
             else -> CoachingAlertEvent(
-                sensorId = event.sensorId,
+                sensorId = tempSensorId,
                 level = CoachingLevel.SAFE,
                 message = "그대로 후진하세요",
                 timestamp = System.currentTimeMillis()
