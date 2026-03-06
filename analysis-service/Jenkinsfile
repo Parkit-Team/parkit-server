@@ -1,0 +1,77 @@
+pipeline {
+    agent any
+
+    environment {
+        // Define common variables
+        SERVICE_NAME = 'analysis-service'
+        DOCKER_IMAGE_NAME = "parkit/${SERVICE_NAME}"
+        DOCKER_TAG = "build-${env.BUILD_ID}"
+    }
+
+    stages {
+        stage('Checkout') {
+            steps {
+                // 깃에서 코드 Checkout
+                echo "Checking out code..."
+                checkout scm
+            }
+        }
+
+        stage('Grant Permissions') {
+            steps {
+                // gradlew 파일 실행 권한 부여
+                dir("${SERVICE_NAME}") {
+                    sh 'chmod +x ./gradlew'
+                }
+            }
+        }
+
+        stage('Test & Build Jar') {
+            steps {
+                // 폴더 이동 후 gradle test build 실행
+                dir("${SERVICE_NAME}") {
+                    echo "Running tests and building JAR for ${SERVICE_NAME}..."
+                    sh './gradlew clean build'
+                }
+            }
+        }
+
+        stage('Build Docker Image') {
+            steps {
+                // 폴더 이동 후 Docker image build
+                dir("${SERVICE_NAME}") {
+                    echo "Building Docker Image: ${DOCKER_IMAGE_NAME}:${DOCKER_TAG}"
+                    sh "docker build -t ${DOCKER_IMAGE_NAME}:${DOCKER_TAG} -t ${DOCKER_IMAGE_NAME}:latest ."
+                }
+            }
+        }
+
+        // docker hub  업로드 시 필요
+        /* 
+        stage('Push Docker Image') {
+            steps {
+                // Placeholder for pushing to a registry (e.g., Docker Hub, AWS ECR)
+                // Requires configuring Docker Hub credentials in Jenkins
+                echo 'Pushing Docker Image to registry...'
+                // withCredentials([usernamePassword(credentialsId: 'dockerhub-credentials', passwordVariable: 'DOCKER_PASSWORD', usernameVariable: 'DOCKER_USERNAME')]) {
+                //     sh "echo \$DOCKER_PASSWORD | docker login -u \$DOCKER_USERNAME --password-stdin"
+                //     sh "docker push ${DOCKER_IMAGE_NAME}:${DOCKER_TAG}"
+                //     sh "docker push ${DOCKER_IMAGE_NAME}:latest"
+                // }
+            }
+        }
+        */
+    }
+
+    post {
+        always {
+            echo "Pipeline for ${SERVICE_NAME} finished."
+        }
+        success {
+            echo "Build Success!"
+        }
+        failure {
+            echo "Build Failed."
+        }
+    }
+}
