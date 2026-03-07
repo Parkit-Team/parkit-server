@@ -4,8 +4,13 @@ pipeline {
     environment {
         // Define common variables
         SERVICE_NAME = 'analysis-service'
-        DOCKER_IMAGE_NAME = "parkit/${SERVICE_NAME}"
+        // FIXME: Change 'parkit' to your actual Docker Hub username or organization name
+        DOCKER_IMAGE_NAME = "rina288/${env.JOB_BASE_NAME.replace('-CI', '')}"
         DOCKER_TAG = "build-${env.BUILD_ID}"
+    }
+
+    tools {
+        jdk 'jdk17'
     }
 
     stages {
