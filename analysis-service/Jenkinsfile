@@ -4,8 +4,7 @@ pipeline {
     environment {
         // Define common variables
         SERVICE_NAME = 'analysis-service'
-        // FIXME: Change 'parkit' to your actual Docker Hub username or organization name
-        DOCKER_IMAGE_NAME = "rina288/${env.JOB_BASE_NAME.replace('-CI', '')}"
+        DOCKER_IMAGE_NAME = "parkit/${env.JOB_BASE_NAME.replace('-CI', '')}"
         DOCKER_TAG = "build-${env.BUILD_ID}"
     }
 
@@ -54,13 +53,20 @@ pipeline {
         stage('Push Docker Image') {
             steps {
                 // Docker Hub에 이미지를 푸시합니다.
-                // 주의: Jenkins 서버에 'dockerhub-credentials' 라는 ID로 Docker Hub 자격 증명(Username/Password)이 저장되어 있어야 합니다.
                 echo 'Pushing Docker Image to Docker Hub registry...'
                 withCredentials([usernamePassword(credentialsId: 'dockerhub-credentials', passwordVariable: 'DOCKER_PASSWORD', usernameVariable: 'DOCKER_USERNAME')]) {
                     sh "echo \$DOCKER_PASSWORD | docker login -u \$DOCKER_USERNAME --password-stdin"
                     sh "docker push ${DOCKER_IMAGE_NAME}:${DOCKER_TAG}"
                     sh "docker push ${DOCKER_IMAGE_NAME}:latest"
                 }
+            }
+        }
+
+        stage('Cleanup') {
+            steps {
+                // 필요없는 도커 이미지 삭제
+                echo 'Pruning unused Docker images...'
+                sh 'docker image prune -f'
             }
         }
     }
