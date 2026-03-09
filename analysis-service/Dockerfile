@@ -12,7 +12,7 @@ COPY settings.gradle.kts .
 RUN chmod +x ./gradlew
 
 # Download dependencies
-# RUN ./gradlew dependencies --no-daemon
+RUN ./gradlew dependencies --no-daemon
 
 # Copy source code
 COPY src ./src
@@ -22,7 +22,9 @@ RUN ./gradlew clean build -x test
 
 # Run stage
 FROM amazoncorretto:17-alpine
+RUN addgroup -S spring && adduser -S spring -G spring
 WORKDIR /app
+USER spring:spring
 
 # Copy the built jar file from the builder stage
 COPY --from=builder /app/build/libs/*.jar app.jar
