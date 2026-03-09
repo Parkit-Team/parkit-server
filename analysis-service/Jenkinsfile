@@ -4,7 +4,7 @@ pipeline {
     environment {
         // Define common variables
         SERVICE_NAME = 'analysis-service'
-        DOCKER_IMAGE_NAME = "parkit/${env.JOB_BASE_NAME.replace('-CI', '')}"
+        DOCKER_IMAGE_NAME = "parkitteam/${env.JOB_BASE_NAME.replace('-CI', '')}"
         DOCKER_TAG = "build-${env.BUILD_ID}"
     }
 
@@ -52,7 +52,7 @@ pipeline {
 
         stage('Push Docker Image') {
             steps {
-                // Docker Hub에 이미지를 푸시합니다.
+                // Docker Hub에 이미지를 푸시
                 echo 'Pushing Docker Image to Docker Hub registry...'
                 withCredentials([usernamePassword(credentialsId: 'dockerhub-credentials', passwordVariable: 'DOCKER_PASSWORD', usernameVariable: 'DOCKER_USERNAME')]) {
                     sh "echo \$DOCKER_PASSWORD | docker login -u \$DOCKER_USERNAME --password-stdin"
