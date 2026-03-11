@@ -65,7 +65,7 @@ pipeline {
                 }
             }
         }
-        #변경이 생긴 경우 argocd-parkit 래포의 manifest 파일에서도 이미지 태그가 업데이트
+        //변경이 생긴 경우 argocd-parkit 래포의 manifest 파일에서도 이미지 태그가 업데이트
         stage('Update K8s Manifests') {
             when { changeset "analysis-service/**" }
             steps {
