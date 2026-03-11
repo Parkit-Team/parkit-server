@@ -23,6 +23,13 @@ spring:
       key-serializer: org.apache.kafka.common.serialization.StringSerializer
       value-serializer: org.apache.kafka.common.serialization.StringSerializer
 
+parkit:
+  kafka:
+    topics:
+      sensor: sensor-topic
+      coachingEvent: coaching-event
+      parkingScoreResult: parking-score-result
+
 logging:
   level:
     root: INFO

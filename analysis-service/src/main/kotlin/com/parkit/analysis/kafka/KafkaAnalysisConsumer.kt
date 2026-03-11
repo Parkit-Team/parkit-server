@@ -7,6 +7,7 @@ import com.parkit.analysis.kafka.dto.ParkingSensorDto
 import com.parkit.analysis.kafka.mapper.toParkingEvent
 import com.parkit.analysis.parking.service.ParkingScoringService
 import org.slf4j.LoggerFactory
+import org.springframework.beans.factory.annotation.Value
 import org.springframework.kafka.annotation.KafkaListener
 import org.springframework.kafka.core.KafkaTemplate
 import org.springframework.stereotype.Component
@@ -17,14 +18,18 @@ class KafkaAnalysisConsumer(
     private val riskDetectionService: RiskDetectionService,
     private val parkingScoringService: ParkingScoringService,
     private val kafkaTemplate: KafkaTemplate<String, String>,
-    private val objectMapper: ObjectMapper
+    private val objectMapper: ObjectMapper,
+    @Value("{parkit.kafka.topics.coachingEvent}")
+    private val coachingEventTopic: String,
+    @Value("{parkit.kafka.topics.parkingScoreResult}")
+    private val parkingScoreResultTopic: String,
 ) {
     private val log = LoggerFactory.getLogger(KafkaAnalysisConsumer::class.java)
 
     /**
      * 타겟 토픽(sensor-topic)을 구독
      */
-    @KafkaListener(topics = ["sensor-topic"], groupId = "analysis-group")
+    @KafkaListener(topics = ["{parkit.kafka.topics.sensor}"])
     fun consume(message: String) {
         try {
             // 수신 된 JSON 페이로드를 ParkingSensorEvent 객체로 역직렬화
@@ -43,10 +48,10 @@ class KafkaAnalysisConsumer(
 						riskDetectionService.calculate(result.step, event)
 							?.let { coaching ->
 								val coachingJson = objectMapper.writeValueAsString(coaching)
-								kafkaTemplate.send("coaching-event", sessionId, coachingJson)
+                                kafkaTemplate.send(coachingEventTopic, sessionId, coachingJson)
 							}
 						val resultJson = objectMapper.writeValueAsString(result)
-						kafkaTemplate.send("parking-score-result", sessionId, resultJson)
+                        kafkaTemplate.send(parkingScoreResultTopic, sessionId, resultJson)
 					},
 					{ error -> log.error("Scoring failed for session: {}", sessionId, error) }
 				)

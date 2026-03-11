@@ -4,6 +4,7 @@ import com.fasterxml.jackson.databind.ObjectMapper
 import com.fasterxml.jackson.module.kotlin.readValue
 import com.parkit.socket.dto.CoachingSocketDto
 import org.slf4j.LoggerFactory
+import org.springframework.beans.factory.annotation.Value
 import org.springframework.kafka.annotation.KafkaListener
 import org.springframework.messaging.simp.SimpMessagingTemplate
 import org.springframework.stereotype.Component
@@ -12,6 +13,8 @@ import org.springframework.stereotype.Component
 class CoachingEventConsumer(
 	private val messagingTemplate: SimpMessagingTemplate,
 	private val objectMapper: ObjectMapper,
+    @Value("{parkit.kafka.topics.coachingEvent}")
+    private val coachingEventTopic: String,
 ) {
 	private val log = LoggerFactory.getLogger(javaClass)
 
@@ -19,7 +22,7 @@ class CoachingEventConsumer(
 		private const val TOPIC_DESTINATION = "/topic/coaching"
 	}
 
-	@KafkaListener(topics = ["coaching-event"], groupId = "socket-group")
+    @KafkaListener(topics = ["{parkit.kafka.topics.coachingEvent}"])
 	fun consume(message: String) {
 		try {
 			val event = objectMapper.readValue<CoachingSocketDto>(message)
