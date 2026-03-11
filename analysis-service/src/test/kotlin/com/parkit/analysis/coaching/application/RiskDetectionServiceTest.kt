@@ -1,18 +1,12 @@
 package com.parkit.analysis.coaching.application
 
-import com.parkit.analysis.coaching.publisher.CoachingEventPublisher
-import com.parkit.analysis.coaching.dto.CoachingSocketDto
 import com.parkit.analysis.coaching.service.RiskDetectionService
 import com.parkit.analysis.kafka.dto.ParkingSensorDto
 import io.kotest.core.spec.style.BehaviorSpec
 import io.kotest.matchers.shouldBe
-import io.mockk.mockk
-import io.mockk.verify
 
 class RiskDetectionServiceTest : BehaviorSpec({
-
-    val mockPublisher = mockk<CoachingEventPublisher>(relaxed = true)
-    val riskDetectionService = RiskDetectionService(mockPublisher)
+	val riskDetectionService = RiskDetectionService()
 
     fun createMockEvent(dist: Double) = ParkingSensorDto(
         time = 0.0, x = 0.0, y = 0.0, z = 0.0, steer = 0.0,
@@ -33,9 +27,8 @@ class RiskDetectionServiceTest : BehaviorSpec({
 				result.rightDistance shouldBe 2.0
 			}
 
-			Then("publish는 호출되지 않는다 (안전 거리)") {
-				riskDetectionService.processEvent(step = 1, event = event)
-				verify(exactly = 0) { mockPublisher.publish(any<CoachingSocketDto>()) }
+			Then("calculate는 null을 반환한다") {
+				riskDetectionService.calculate(step = 1, event = event) shouldBe null
 			}
 		}
 
@@ -47,9 +40,8 @@ class RiskDetectionServiceTest : BehaviorSpec({
 				result.currentDistance shouldBe 0.8
 			}
 
-			Then("publish가 호출된다") {
-				riskDetectionService.processEvent(step = 1, event = event)
-				verify(exactly = 1) { mockPublisher.publish(any<CoachingSocketDto>()) }
+			Then("calculate는 코칭 이벤트를 반환한다") {
+				riskDetectionService.calculate(step = 1, event = event)?.currentDistance shouldBe 0.8
 			}
 		}
 

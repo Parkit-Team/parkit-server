@@ -1,10 +1,8 @@
 package com.parkit.analysis.coaching.service
 
 import com.parkit.analysis.coaching.dto.CoachingSocketDto
-import com.parkit.analysis.coaching.publisher.CoachingEventPublisher
 import com.parkit.analysis.kafka.dto.ParkingSensorDto
 import com.parkit.analysis.parking.domain.ParkingReference
-import org.slf4j.LoggerFactory
 import org.springframework.stereotype.Service
 import kotlin.math.min
 import kotlin.math.pow
@@ -12,10 +10,7 @@ import kotlin.math.sqrt
 
 @Service
 class RiskDetectionService(
-    private val coachingEventPublisher: CoachingEventPublisher,
 ) {
-    private val log = LoggerFactory.getLogger(RiskDetectionService::class.java)
-
     /**
      * 주차 센서와 장애물 간의 거리
      */
@@ -25,14 +20,13 @@ class RiskDetectionService(
     }
 
     /**
-     * Kafka에서 수신한 ParkingSensorEvent를 통해 실시간 위험 판단 후 코칭 이벤트를 발행합니다.
+     * 주행 이벤트를 기반으로 코칭 이벤트를 계산합니다.
      */
-    fun processEvent(step: Int, event: ParkingSensorDto) {
+	fun calculate(step: Int, event: ParkingSensorDto): CoachingSocketDto? {
 		val minDistance = minDistance(event)
-		if (minDistance > WARNING_THRESHOLD) return
+		if (minDistance > WARNING_THRESHOLD) return null
 
-		val coachingEvent = createCoachingEvent(step, event, minDistance)
-		coachingEventPublisher.publish(coachingEvent)
+		return createCoachingEvent(step, event, minDistance)
     }
 
     /**

@@ -22,7 +22,7 @@ class KafkaAnalysisConsumer(
     private val log = LoggerFactory.getLogger(KafkaAnalysisConsumer::class.java)
 
     /**
-     * 타겟 토픽(sensor-raw)을 구독
+     * 타겟 토픽(sensor-topic)을 구독
      */
     @KafkaListener(topics = ["sensor-topic"], groupId = "analysis-group")
     fun consume(message: String) {
@@ -40,7 +40,11 @@ class KafkaAnalysisConsumer(
 				.publishOn(Schedulers.boundedElastic())
 				.subscribe(
 					{ result ->
-						riskDetectionService.processEvent(result.step, event)
+						riskDetectionService.calculate(result.step, event)
+							?.let { coaching ->
+								val coachingJson = objectMapper.writeValueAsString(coaching)
+								kafkaTemplate.send("coaching-event", sessionId, coachingJson)
+							}
 						val resultJson = objectMapper.writeValueAsString(result)
 						kafkaTemplate.send("parking-score-result", sessionId, resultJson)
 					},
