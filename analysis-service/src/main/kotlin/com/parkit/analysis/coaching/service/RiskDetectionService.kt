@@ -1,6 +1,7 @@
 package com.parkit.analysis.coaching.service
 
 import com.parkit.analysis.coaching.dto.CoachingSocketDto
+import com.parkit.analysis.coaching.dto.ObstacleDistancesDto
 import com.parkit.analysis.kafka.dto.ParkingSensorDto
 import com.parkit.analysis.parking.domain.ParkingReference
 import org.springframework.stereotype.Service
@@ -52,10 +53,12 @@ class RiskDetectionService(
             targetDistance = targetDistance,
             currentAngle = event.handleAngle,
             currentDistance = minDistance,
-            frontDistance = event.frontDist,
-            backDistance = event.rearDist,
-            leftDistance = event.leftDist,
-            rightDistance = event.rightDist,
+			distances = ObstacleDistancesDto(
+				frontDistance = event.frontDist,
+				backDistance = event.rearDist,
+				leftDistance = event.leftDist,
+				rightDistance = event.rightDist,
+			),
             coachingId = coachingId,
         )
 	}

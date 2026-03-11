@@ -21,10 +21,10 @@ class RiskDetectionServiceTest : BehaviorSpec({
 
 			Then("현재 거리/센서 거리가 DTO에 반영된다") {
 				result.currentDistance shouldBe 2.0
-				result.frontDistance shouldBe 2.0
-				result.backDistance shouldBe 2.0
-				result.leftDistance shouldBe 2.0
-				result.rightDistance shouldBe 2.0
+				result.distances.frontDistance shouldBe 2.0
+				result.distances.backDistance shouldBe 2.0
+				result.distances.leftDistance shouldBe 2.0
+				result.distances.rightDistance shouldBe 2.0
 			}
 
 			Then("calculate는 null을 반환한다") {
