@@ -18,7 +18,7 @@ class KafkaAnalysisConsumer(
     /**
      * 타겟 토픽(sensor-raw)을 구독
      */
-    @KafkaListener(topics = ["parking-topic"], groupId = "analysis-group")
+    @KafkaListener(topics = ["sensor-topic"], groupId = "analysis-group")
     fun consume(message: String) {
         try {
             // 수신 된 JSON 페이로드를 ParkingSensorEvent 객체로 역직렬화
@@ -31,7 +31,7 @@ class KafkaAnalysisConsumer(
             riskDetectionService.processEvent(event)
             
         } catch (e: Exception) {
-            log.error("Failed to process Kafka message from 'analysis-events' topic", e)
+            log.error("Failed to process Kafka message from 'sensor-topic' topic", e)
         }
     }
 }
