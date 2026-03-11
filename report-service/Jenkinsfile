@@ -22,7 +22,7 @@ pipeline {
         }
 
         stage('Grant Permissions') {
-            when { changeset "report-service/**" }
+            //when { changeset "report-service/**" }
             steps {
                 // gradlew 파일 실행 권한 부여
                 dir("${SERVICE_NAME}") {
@@ -32,7 +32,7 @@ pipeline {
         }
 
         stage('Test & Build Jar') {
-            when { changeset "report-service/**" }
+            //when { changeset "report-service/**" }
             steps {
                 // 폴더 이동 후 gradle test build 실행
                 dir("${SERVICE_NAME}") {
@@ -43,7 +43,7 @@ pipeline {
         }
 
         stage('Build Docker Image') {
-            when { changeset "report-service/**" }
+            //when { changeset "report-service/**" }
             steps {
                 // 폴더 이동 후 Docker image build
                 dir("${SERVICE_NAME}") {
@@ -54,7 +54,7 @@ pipeline {
         }
 
         stage('Push Docker Image') {
-            when { changeset "report-service/**" }
+            //when { changeset "report-service/**" }
             steps {
                 // Docker Hub에 이미지를 푸시
                 echo 'Pushing Docker Image to Docker Hub registry...'
