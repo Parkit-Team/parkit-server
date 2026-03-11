@@ -1,4 +1,4 @@
-package com.parkit.analysis.dto
+package com.parkit.analysis.coaching.dto
 
 /**
  * socket service로 전달될 코칭 알림 이벤트

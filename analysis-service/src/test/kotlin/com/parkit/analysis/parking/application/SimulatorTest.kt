@@ -1,9 +1,9 @@
-package com.parkit.analysis.service
+package com.parkit.analysis.parking.application
 
-import com.parkit.analysis.domain.parking.ParkingStepState
-import com.parkit.analysis.dto.parking.ParkingEventDto
-import com.parkit.analysis.dto.parking.SensorDataDto
-import com.parkit.analysis.repository.ParkingStepStateRedisRepository
+import com.parkit.analysis.parking.repository.ParkingStepStateRepository
+import com.parkit.analysis.parking.domain.ParkingEvent
+import com.parkit.analysis.parking.domain.ParkingStepState
+import com.parkit.analysis.parking.service.ParkingScoringService
 import io.mockk.every
 import io.mockk.mockk
 import org.junit.jupiter.api.Test
@@ -16,9 +16,9 @@ class SimulatorTest {
     fun `실제 CSV 데이터를 활용한 시뮬레이션 테스트`() {
         val sessionId = "test-session"
         
-        // Redis Mocking (메모리로 상태 유지)
-        val stateMap = mutableMapOf<String, ParkingStepState>()
-        val stateRepository = mockk<ParkingStepStateRedisRepository>()
+		// Redis Mocking (메모리로 상태 유지)
+		val stateMap = mutableMapOf<String, ParkingStepState>()
+		val stateRepository = mockk<ParkingStepStateRepository>()
         
         every { stateRepository.findById(sessionId) } answers {
             val state = stateMap[sessionId]
@@ -60,10 +60,10 @@ class SimulatorTest {
             val rightDist = tokens[10].toDoubleOrNull() ?: 5.0
             val rearDist = tokens[11].toDoubleOrNull() ?: 5.0
 
-            val event = ParkingEventDto(
-                x = x, y = y, z = z, handleAngle = handleAngle,
-                sensor = SensorDataDto(frontDist, leftDist, rightDist, rearDist, speed)
-            )
+			val event = ParkingEvent(
+				x = x, y = y, z = z, handleAngle = handleAngle,
+				sensor = ParkingEvent.SensorData(frontDist, leftDist, rightDist, rearDist, speed)
+			)
 
             // 처리
             val result = scoringService.processParkingEvent(sessionId, event).block()!!
