@@ -54,7 +54,6 @@ pipeline {
         }
 
         stage('Push Docker Image') {
-            when { changeset "socket-service/**" }
             steps {
                 // Docker Hub에 이미지를 푸시
                 echo 'Pushing Docker Image to Docker Hub registry...'
