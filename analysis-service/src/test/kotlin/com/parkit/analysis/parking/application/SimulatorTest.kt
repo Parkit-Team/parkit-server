@@ -8,7 +8,7 @@ import io.mockk.every
 import io.mockk.mockk
 import org.junit.jupiter.api.Test
 import reactor.core.publisher.Mono
-import java.io.File
+import java.io.BufferedReader
 
 class SimulatorTest {
 
@@ -33,17 +33,10 @@ class SimulatorTest {
 
         val scoringService = ParkingScoringService(stateRepository)
 
-        // CSV 읽기 (주의: 상대 경로는 프로젝트 루트 기준)
-        val csvFile = File("../data/step01.csv")
-        if (!csvFile.exists()) {
-            // gradlew 실행 경로에 따라 다를 수 있음
-            val altFile = File("data/step01.csv")
-            if (altFile.exists()) csvFile.absolutePath else return
-        }
-        val targetFile = if (File("../data/step01.csv").exists()) File("../data/step01.csv") else File("../../data/step01.csv")
-
         println("=== T-Parking Simulator Started ===")
-        val lines = targetFile.readLines().drop(1) // Header 제외
+		val inputStream = SimulatorTest::class.java.getResourceAsStream("/data/step01.csv")
+			?: throw IllegalStateException("Missing test resource: /data/step01.csv")
+		val lines = inputStream.bufferedReader().use(BufferedReader::readLines).drop(1) // Header 제외
         
         for (line in lines) {
             val tokens = line.split(",")
