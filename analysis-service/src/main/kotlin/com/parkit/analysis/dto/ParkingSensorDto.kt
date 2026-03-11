@@ -4,8 +4,7 @@ import com.fasterxml.jackson.annotation.JsonProperty
 /**
  * 센서 브릿지(Python)에서 Kafka를 통해 보내는 실시간 차량 센서 데이터를 표현하는 모델
  */
-
-data class ParkingSensorEvent(
+data class ParkingSensorDto(
     val time: Double,
     val x: Double,
     val y: Double,
