@@ -36,3 +36,13 @@ springdoc:
     path: /swagger-ui.html
   api-docs:
     path: /v3/api-docs
+
+# 프로메테우스 메트릭스 설정 추가
+management:
+  endpoints:
+    web:
+      exposure:
+        include: prometheus, metrics
+  endpoint:
+    prometheus:
+      enabled: true
