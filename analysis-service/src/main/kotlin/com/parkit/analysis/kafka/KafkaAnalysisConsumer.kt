@@ -18,7 +18,7 @@ class KafkaAnalysisConsumer(
     /**
      * 타겟 토픽(sensor-raw)을 구독
      */
-    @KafkaListener(topics = ["seonsor-topic"], groupId = "analysis-group")
+    @KafkaListener(topics = ["sensor-topic"], groupId = "analysis-group")
     fun consume(message: String) {
         try {
             // 수신 된 JSON 페이로드를 ParkingSensorEvent 객체로 역직렬화
