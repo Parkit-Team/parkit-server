@@ -1,11 +1,11 @@
-package com.parkit.analysis.dto
+package com.parkit.analysis.kafka.dto
 
 import com.fasterxml.jackson.annotation.JsonProperty
 /**
- * 센서 브릿지(Python)에서 Kafka를 통해 보내는 실시간 차량 센서 데이터를 표현하는 모델
+ * Kafka Producer -> broker -> Kafka Consumer
+ * analysis-service는 consumer의 역할을 하므로 실시간 센서 데이터를 받는 DTO
  */
-
-data class ParkingSensorEvent(
+data class ParkingSensorDto(
     val time: Double,
     val x: Double,
     val y: Double,

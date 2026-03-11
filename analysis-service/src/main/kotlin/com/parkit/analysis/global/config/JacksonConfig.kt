@@ -1,4 +1,4 @@
-package com.parkit.analysis.config
+package com.parkit.analysis.global.config
 
 import com.fasterxml.jackson.databind.DeserializationFeature
 import com.fasterxml.jackson.databind.ObjectMapper
