@@ -65,6 +65,25 @@ pipeline {
                 }
             }
         }
+        stage('Update K8s Manifests') {
+            when { changeset "socket-service/**" }
+            steps {
+                echo 'Updating image tag in argocd-parkit repository...'
+                withCredentials([usernamePassword(credentialsId: 'github-credentials', passwordVariable: 'GIT_PASSWORD', usernameVariable: 'GIT_USERNAME')]) {
+                    sh """
+                        git clone https://${GIT_USERNAME}:${GIT_PASSWORD}@github.com/Parkit-Team/argocd-parkit.git
+                        cd argocd-parkit
+                        sed -i 's|image: ${DOCKER_IMAGE_NAME}:.*|image: ${DOCKER_IMAGE_NAME}:${DOCKER_TAG}|g' \
+                            ${SERVICE_NAME}/deployment.yaml
+                        git config user.email "jenkins@ci.com"
+                        git config user.name "Jenkins CI"
+                        git add ${SERVICE_NAME}/deployment.yaml
+                        git commit -m "[CI] Update ${SERVICE_NAME} image to ${DOCKER_TAG}"
+                        git push origin main
+                    """
+                }
+            }
+        }
 
         stage('Cleanup') {
             steps {
