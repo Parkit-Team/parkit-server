@@ -17,6 +17,9 @@ parkit:
   kafka:
     topics:
       coachingEvent: coaching-event
+  mock:
+    coaching:
+      enabled: false
 
 logging:
   level:

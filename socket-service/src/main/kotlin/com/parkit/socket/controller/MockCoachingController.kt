@@ -2,6 +2,7 @@ package com.parkit.socket.controller
 
 import com.parkit.socket.dto.CoachingSocketDto
 import com.parkit.socket.dto.ObstacleDistancesDto
+import org.springframework.boot.autoconfigure.condition.ConditionalOnProperty
 import org.springframework.messaging.simp.SimpMessagingTemplate
 import org.springframework.scheduling.annotation.EnableScheduling
 import org.springframework.scheduling.annotation.Scheduled
@@ -10,6 +11,7 @@ import kotlin.random.Random
 
 @Controller
 @EnableScheduling
+@ConditionalOnProperty(prefix = "parkit.mock.coaching", name = ["enabled"], havingValue = "true")
 class MockCoachingController(
     private val messagingTemplate: SimpMessagingTemplate
 ) {
