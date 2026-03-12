@@ -1,4 +1,4 @@
-package com.parkit.analysis.config
+package com.parkit.analysis.global.config
 
 import org.springframework.context.annotation.Configuration
 import org.springframework.kafka.annotation.EnableKafka
