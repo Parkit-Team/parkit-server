@@ -20,9 +20,9 @@ repositories {
 }
 
 
+
 dependencies {
 	implementation("org.springframework.boot:spring-boot-starter-data-redis-reactive")
-	implementation("org.springframework.boot:spring-boot-starter-data-mongodb-reactive")
 	implementation("org.springframework.boot:spring-boot-starter-kafka")
 	implementation("org.springframework.boot:spring-boot-starter-webflux")
 	implementation("org.springdoc:springdoc-openapi-starter-webflux-ui:2.8.5")
