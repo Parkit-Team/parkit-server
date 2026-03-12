@@ -34,6 +34,10 @@ dependencies {
 	implementation("org.springframework.boot:spring-boot-starter-actuator")
 	implementation("io.micrometer:micrometer-registry-prometheus")
 
+	// json 변환기 의존성 추가
+	implementation("com.fasterxml.jackson.datatype:jackson-datatype-jsr310")
+	implementation("com.fasterxml.jackson.module:jackson-module-kotlin")
+
 	testImplementation("org.springframework.boot:spring-boot-starter-data-redis-reactive-test")
 	testImplementation("org.springframework.boot:spring-boot-starter-kafka-test")
 	testImplementation("org.springframework.boot:spring-boot-starter-webflux-test")
