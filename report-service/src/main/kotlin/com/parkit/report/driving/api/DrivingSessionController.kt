@@ -18,6 +18,7 @@ import org.springframework.http.HttpStatus
 import org.springframework.web.bind.annotation.GetMapping
 import org.springframework.web.bind.annotation.PathVariable
 import org.springframework.web.bind.annotation.PostMapping
+import org.springframework.web.bind.annotation.CrossOrigin
 import org.springframework.web.bind.annotation.RequestBody
 import org.springframework.web.bind.annotation.RequestMapping
 import org.springframework.web.bind.annotation.RequestParam
@@ -26,6 +27,7 @@ import org.springframework.web.bind.annotation.RestController
 
 @RestController
 @RequestMapping("/api/driving-sessions")
+@CrossOrigin(origins = ["*"])
 @Tag(
 	name = "주행 리포트",
 	description = "주행 세션(start/stop), 센서 로그, 프론트 점수(frontendScore)를 저장/조회합니다.",
