@@ -11,6 +11,7 @@ import org.springframework.beans.factory.annotation.Value
 import org.springframework.kafka.annotation.KafkaListener
 import org.springframework.kafka.core.KafkaTemplate
 import org.springframework.stereotype.Component
+import reactor.core.publisher.Mono
 import reactor.core.scheduler.Schedulers
 
 @Component
@@ -38,23 +39,27 @@ class KafkaAnalysisConsumer(
 //            println("✅ 수신된 주차 데이터: ${event.status} | 메시지: ${event.msg}")
             log.debug("Received Kafka message: {}", message)
 
-			// 해당 이벤트를 RiskDetectionService로 전달하여 처리
-			// 주차 채점 평가 (세션 아이디는 현재 없으므로 'default-session'으로 통일)
-			val sessionId = "default-session"
-			parkingScoringService.processParkingEvent(sessionId, event.toParkingEvent())
-				.publishOn(Schedulers.boundedElastic())
-				.subscribe(
-					{ result ->
-						riskDetectionService.calculate(result.step, event)
-							?.let { coaching ->
-								val coachingJson = objectMapper.writeValueAsString(coaching)
-                                kafkaTemplate.send(coachingEventTopic, sessionId, coachingJson)
-							}
-						val resultJson = objectMapper.writeValueAsString(result)
-                        kafkaTemplate.send(parkingScoreResultTopic, sessionId, resultJson)
-					},
-					{ error -> log.error("Scoring failed for session: {}", sessionId, error) }
-				)
+            // UUID 임시 발급 또는 세션 연결 우회 로직 필요
+            // session id를 Kafka 메시지에서 가져오거나 별도 처리
+            val sessionId = "unknown-session"
+
+            parkingScoringService.processParkingEvent(sessionId, event.toParkingEvent())
+                .publishOn(Schedulers.boundedElastic())
+                .doOnNext { result ->
+                    riskDetectionService.calculate(result.step, event)
+                        ?.let { coaching ->
+                            val coachingJson = objectMapper.writeValueAsString(coaching)
+                            kafkaTemplate.send(coachingEventTopic, sessionId, coachingJson)
+                        }
+
+                    val resultJson = objectMapper.writeValueAsString(result)
+                    kafkaTemplate.send(parkingScoreResultTopic, sessionId, resultJson)
+                }
+                .then()
+                .subscribe(
+                    { /* no-op */ },
+                    { error -> log.error("Failed to process sensor event", error) },
+                )
 
         } catch (e: Exception) {
             log.error("Failed to process Kafka message from 'sensor-topic' topic", e)
