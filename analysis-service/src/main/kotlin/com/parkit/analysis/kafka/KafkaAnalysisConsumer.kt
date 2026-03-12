@@ -3,6 +3,8 @@ package com.parkit.analysis.kafka
 import com.fasterxml.jackson.databind.ObjectMapper
 import com.fasterxml.jackson.module.kotlin.readValue
 import com.parkit.analysis.coaching.service.RiskDetectionService
+import com.parkit.analysis.driving.service.SensorLogService
+import com.parkit.analysis.driving.service.DrivingSessionService
 import com.parkit.analysis.kafka.dto.ParkingSensorDto
 import com.parkit.analysis.kafka.mapper.toParkingEvent
 import com.parkit.analysis.parking.service.ParkingScoringService
@@ -11,12 +13,15 @@ import org.springframework.beans.factory.annotation.Value
 import org.springframework.kafka.annotation.KafkaListener
 import org.springframework.kafka.core.KafkaTemplate
 import org.springframework.stereotype.Component
+import reactor.core.publisher.Mono
 import reactor.core.scheduler.Schedulers
 
 @Component
 class KafkaAnalysisConsumer(
     private val riskDetectionService: RiskDetectionService,
     private val parkingScoringService: ParkingScoringService,
+	private val drivingSessionService: DrivingSessionService,
+	private val sensorLogService: SensorLogService,
     private val kafkaTemplate: KafkaTemplate<String, String>,
     private val objectMapper: ObjectMapper,
     @Value("\${parkit.kafka.topics.coachingEvent}")
@@ -38,22 +43,33 @@ class KafkaAnalysisConsumer(
 //            println("✅ 수신된 주차 데이터: ${event.status} | 메시지: ${event.msg}")
             log.debug("Received Kafka message: {}", message)
 
-			// 해당 이벤트를 RiskDetectionService로 전달하여 처리
-			// 주차 채점 평가 (세션 아이디는 현재 없으므로 'default-session'으로 통일)
-			val sessionId = "default-session"
-			parkingScoringService.processParkingEvent(sessionId, event.toParkingEvent())
-				.publishOn(Schedulers.boundedElastic())
+			drivingSessionService.findLatestRunning()
+				.switchIfEmpty(
+					Mono.defer {
+						log.debug("No active driving session; skipping sensor log + scoring")
+						Mono.empty()
+					}
+				)
+				.flatMap { session ->
+					val sessionId = session.id
+					sensorLogService.append(sessionId, event)
+						.then(parkingScoringService.processParkingEvent(sessionId, event.toParkingEvent()))
+						.publishOn(Schedulers.boundedElastic())
+						.doOnNext { result ->
+							riskDetectionService.calculate(result.step, event)
+								?.let { coaching ->
+									val coachingJson = objectMapper.writeValueAsString(coaching)
+									kafkaTemplate.send(coachingEventTopic, sessionId, coachingJson)
+								}
+
+							val resultJson = objectMapper.writeValueAsString(result)
+							kafkaTemplate.send(parkingScoreResultTopic, sessionId, resultJson)
+						}
+						.then()
+				}
 				.subscribe(
-					{ result ->
-						riskDetectionService.calculate(result.step, event)
-							?.let { coaching ->
-								val coachingJson = objectMapper.writeValueAsString(coaching)
-                                kafkaTemplate.send(coachingEventTopic, sessionId, coachingJson)
-							}
-						val resultJson = objectMapper.writeValueAsString(result)
-                        kafkaTemplate.send(parkingScoreResultTopic, sessionId, resultJson)
-					},
-					{ error -> log.error("Scoring failed for session: {}", sessionId, error) }
+					{ /* no-op */ },
+					{ error -> log.error("Failed to process sensor event", error) },
 				)
 
         } catch (e: Exception) {
