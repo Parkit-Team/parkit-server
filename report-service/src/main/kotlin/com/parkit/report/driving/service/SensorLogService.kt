@@ -16,7 +16,6 @@ class SensorLogService(
 		val now = Instant.now(clock)
 		val doc = SensorLogDocument(
 			sessionId = sessionId,
-			frontendScore = null,
 			receivedAt = now,
 			time = event.time,
 			x = event.x,

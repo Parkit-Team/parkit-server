@@ -2,7 +2,6 @@ package com.parkit.report.driving.service
 
 import com.parkit.report.driving.domain.DrivingSessionStatus
 import com.parkit.report.driving.persistence.document.DrivingSessionDocument
-import com.parkit.report.driving.persistence.document.SensorLogDocument
 import com.parkit.report.driving.persistence.repository.DrivingSessionMongoRepository
 
 import org.springframework.data.mongodb.core.FindAndModifyOptions
@@ -53,14 +52,7 @@ class DrivingSessionService(
 			stoppedAt = now,
 			frontendScore = frontendScore,
 		)
-		val savedSession = drivingSessionRepository.save(updated)
-
-		// stop 시점에 해당 세션의 모든 센서 로그에 점수를 일괄 반영
-		val scoreQuery = Query(Criteria.where("sessionId").`is`(sessionId))
-		val scoreUpdate = Update().set("frontendScore", frontendScore)
-		mongoTemplate.updateMulti(scoreQuery, scoreUpdate, SensorLogDocument::class.java)
-
-		return savedSession
+		return drivingSessionRepository.save(updated)
 	}
 
 	fun findLatestRunning(): DrivingSessionDocument? =

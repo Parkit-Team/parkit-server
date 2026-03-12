@@ -1,6 +1,7 @@
 package com.parkit.report.driving.api
 
 import com.parkit.report.driving.api.dto.DrivingSensorLogRequest
+import com.parkit.report.driving.api.dto.DrivingSessionReportResponse
 import com.parkit.report.driving.api.dto.StartDrivingSessionRequest
 import com.parkit.report.driving.api.dto.StartDrivingSessionResponse
 import com.parkit.report.driving.api.dto.StopDrivingSessionRequest
@@ -99,4 +100,18 @@ class DrivingSessionController(
 		@Parameter(description = "최대 반환 개수", example = "2000")
 		@RequestParam(required = false, defaultValue = "2000") limit: Long,
 	): List<SensorLogDocument> = sensorLogService.getSensorLogs(sessionId, limit)
+
+	@GetMapping("/{sessionId}/report")
+	@Operation(
+		summary = "주행 리포트 조회(점수 + 센서로그)",
+		description = "세션 정보(최종 점수 포함)와 센서 로그 목록을 함께 반환합니다.",
+	)
+	fun report(
+		@PathVariable sessionId: String,
+		@RequestParam(required = false, defaultValue = "2000") limit: Long,
+	): DrivingSessionReportResponse {
+		val session = drivingSessionService.get(sessionId)
+		val logs = sensorLogService.getSensorLogs(sessionId, limit)
+		return DrivingSessionReportResponse(session = session, sensorLogs = logs)
+	}
 }
