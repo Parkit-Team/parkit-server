@@ -29,30 +29,24 @@ class RiskDetectionService(
 		return createCoachingEvent(step, event, minDistance)
     }
 
-    /**
-     * 거리 데이터를 기반으로 코칭 이벤트 반환
-     */
-	fun createCoachingEvent(step: Int, event: ParkingSensorDto): CoachingSocketDto {
-		val minDistance = minDistance(event)
-		return createCoachingEvent(step, event, minDistance)
-	}
-
-        private fun createCoachingEvent(step: Int, event: ParkingSensorDto, minDistance: Double): CoachingSocketDto {
+	private fun createCoachingEvent(step: Int, event: ParkingSensorDto, minDistance: Double): CoachingSocketDto {
 		val ref = ParkingReference.getReferenceForStep(step)
 		val targetAngle = ref?.handleAngle ?: 0.0
 		val targetDistance = if (ref == null) 0.0 else {
             sqrt((event.x - ref.x).pow(2) + (event.y - ref.y).pow(2))
 		}
-		val frontGap = (event.frontDist * 100).roundToInt()
-		val backGap = (event.rearDist * 100).roundToInt()
-		val leftGap = (event.leftDist * 100).roundToInt()
-		val rightGap = (event.rightDist * 100).roundToInt()
+		val distancesCm = ObstacleDistancesDto(
+			frontDistance = (event.frontDist * 100).roundToInt(),
+			backDistance = (event.rearDist * 100).roundToInt(),
+			leftDistance = (event.leftDist * 100).roundToInt(),
+			rightDistance = (event.rightDist * 100).roundToInt(),
+		)
 
 		val coachingId = when {
-			backGap <= DANGER_LIMIT_FRONT_BACK -> 1
-			frontGap <= DANGER_LIMIT_FRONT_BACK -> 2
-			leftGap <= DANGER_LIMIT_SIDE -> 3
-			rightGap <= DANGER_LIMIT_SIDE -> 4
+			distancesCm.backDistance <= DANGER_LIMIT_FRONT_BACK -> 1
+			distancesCm.frontDistance <= DANGER_LIMIT_FRONT_BACK -> 2
+			distancesCm.leftDistance <= DANGER_LIMIT_SIDE -> 3
+			distancesCm.rightDistance <= DANGER_LIMIT_SIDE -> 4
 			else -> 5
 		}
 
@@ -63,12 +57,7 @@ class RiskDetectionService(
             targetDistance = targetDistance,
             currentAngle = event.handleAngle,
             currentDistance = minDistance,
-			distances = ObstacleDistancesDto(
-				frontDistance = frontGap,
-				backDistance = backGap,
-				leftDistance = leftGap,
-				rightDistance = rightGap,
-			),
+			distances = distancesCm,
             coachingId = coachingId,
         )
 	}
