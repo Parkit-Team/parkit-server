@@ -23,4 +23,8 @@ data class DrivingSessionDocument(
 	val stoppedAt: Instant?,
 	@field:Schema(description = "프론트에서 계산한 점수")
 	val frontendScore: Double?,
+	@field:Schema(description = "세션 시작 후 첫 센서 원본 JSON")
+	val firstSensorPayloadJson: String?,
+	@field:Schema(description = "첫 센서 수신 시간(UTC)")
+	val firstSensorReceivedAt: Instant?,
 )
