@@ -13,7 +13,7 @@ import org.springframework.stereotype.Component
 class CoachingEventConsumer(
 	private val messagingTemplate: SimpMessagingTemplate,
 	private val objectMapper: ObjectMapper,
-    @Value("{parkit.kafka.topics.coachingEvent}")
+    @Value("\${parkit.kafka.topics.coachingEvent}")
     private val coachingEventTopic: String,
 ) {
 	private val log = LoggerFactory.getLogger(javaClass)
@@ -22,7 +22,7 @@ class CoachingEventConsumer(
 		private const val TOPIC_DESTINATION = "/topic/coaching"
 	}
 
-    @KafkaListener(topics = ["{parkit.kafka.topics.coachingEvent}"])
+    @KafkaListener(topics = ["\${parkit.kafka.topics.coachingEvent}"])
 	fun consume(message: String) {
 		try {
 			val event = objectMapper.readValue<CoachingSocketDto>(message)
