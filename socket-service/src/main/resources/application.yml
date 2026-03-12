@@ -6,7 +6,7 @@ spring:
     name: socket-service
 
   kafka:
-    bootstrap-servers: localhost:9092
+    bootstrap-servers: my-kafka:9092
     consumer:
       group-id: socket-group
       auto-offset-reset: latest

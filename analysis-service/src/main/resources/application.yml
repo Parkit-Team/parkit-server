@@ -11,7 +11,7 @@ spring:
       port: 6379
 
   kafka:
-    bootstrap-servers: my-kafka.parkit.svc.cluster.local:9092
+    bootstrap-servers: my-kafka:9092
     properties:
       api.version.request: true
     consumer:
