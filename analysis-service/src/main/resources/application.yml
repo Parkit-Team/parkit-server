@@ -7,7 +7,7 @@ spring:
   
   data:
     redis:
-      host: localhost
+      host: redis.parkit.svc.cluster.local
       port: 6379
   kafka:
     bootstrap-servers: ${SPRING_KAFKA_BOOTSTRAP_SERVERS:localhost:9092}
