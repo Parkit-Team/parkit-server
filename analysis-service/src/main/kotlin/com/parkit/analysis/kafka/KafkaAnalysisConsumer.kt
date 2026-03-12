@@ -46,11 +46,9 @@ class KafkaAnalysisConsumer(
             parkingScoringService.processParkingEvent(sessionId, event.toParkingEvent())
                 .publishOn(Schedulers.boundedElastic())
                 .doOnNext { result ->
-                    riskDetectionService.calculate(result.step, event)
-                        ?.let { coaching ->
-                            val coachingJson = objectMapper.writeValueAsString(coaching)
-                            kafkaTemplate.send(coachingEventTopic, sessionId, coachingJson)
-                        }
+							val coaching = riskDetectionService.calculate(result.step, event)
+							val coachingJson = objectMapper.writeValueAsString(coaching)
+							kafkaTemplate.send(coachingEventTopic, sessionId, coachingJson)
 
                     val resultJson = objectMapper.writeValueAsString(result)
                     kafkaTemplate.send(parkingScoreResultTopic, sessionId, resultJson)
