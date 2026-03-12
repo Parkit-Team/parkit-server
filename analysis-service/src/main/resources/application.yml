@@ -9,7 +9,8 @@ spring:
     redis:
       host: localhost
       port: 6379
-
+    mongodb:
+      uri: mongodb://mongodb-service:27017/dbname
   kafka:
     bootstrap-servers: my-kafka.parkit.svc.cluster.local:9092
     properties:
