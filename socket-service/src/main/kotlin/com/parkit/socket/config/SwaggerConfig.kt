@@ -14,8 +14,8 @@ class SwaggerConfig {
             .info(
                 Info()
                     .title("Parkit Socket Service API")
-                    .description("API Documentation for Socket Service")
-                    .version("1.0.0")
+                    .description("Socket(WebSocket/STOMP) 서비스 문서")
+                    .version("v1")
             )
     }
 }
