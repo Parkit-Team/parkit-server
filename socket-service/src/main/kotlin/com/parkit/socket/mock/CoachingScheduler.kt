@@ -39,10 +39,10 @@ class CoachingScheduler(
 		val mockData = CoachingSocketDto(
 			step = 1,
 			timestamp = System.currentTimeMillis(),
-			targetAngle = 0.0,
-			targetDistance = 1.0,
-			currentAngle = 0.0,
-			currentDistance = Random.nextDouble(0.0, 2.0),
+            targetAngle = 0,
+            targetDistance = 100,
+            currentAngle = 0,
+            currentDistance = Random.nextInt(0, 201),
 			distances = ObstacleDistancesDto(
 				frontDistance = frontGap,
 				backDistance = backGap,

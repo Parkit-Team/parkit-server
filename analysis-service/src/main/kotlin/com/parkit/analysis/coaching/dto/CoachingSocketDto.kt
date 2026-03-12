@@ -13,10 +13,11 @@ data class ObstacleDistancesDto(
 data class CoachingSocketDto(
     val step: Int,
     val timestamp: Long,
-    val targetAngle: Double,
-    val targetDistance: Double,
-    val currentAngle: Double,
-    val currentDistance: Double,
+    // units: angle=deg, distance=cm
+    val targetAngle: Int,
+    val targetDistance: Int,
+    val currentAngle: Int,
+    val currentDistance: Int,
 	val distances: ObstacleDistancesDto,
     val coachingId: Int,
 )

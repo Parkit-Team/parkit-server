@@ -5,9 +5,9 @@ import com.parkit.analysis.coaching.dto.ObstacleDistancesDto
 import com.parkit.analysis.kafka.dto.ParkingSensorDto
 import com.parkit.analysis.parking.domain.ParkingReference
 import org.springframework.stereotype.Service
-import kotlin.math.roundToInt
 import kotlin.math.min
 import kotlin.math.pow
+import kotlin.math.roundToInt
 import kotlin.math.sqrt
 
 @Service
@@ -31,9 +31,11 @@ class RiskDetectionService(
 
 	private fun createCoachingEvent(step: Int, event: ParkingSensorDto, minDistance: Double): CoachingSocketDto {
 		val ref = ParkingReference.getReferenceForStep(step)
-		val targetAngle = ref?.handleAngle ?: 0.0
-		val targetDistance = if (ref == null) 0.0 else {
-            sqrt((event.x - ref.x).pow(2) + (event.y - ref.y).pow(2))
+        val targetAngleDeg = (ref?.handleAngle ?: 0.0).roundToInt()
+        val targetDistanceCm = if (ref == null) {
+            0
+        } else {
+            (sqrt((event.x - ref.x).pow(2) + (event.y - ref.y).pow(2)) * 100).roundToInt()
 		}
 		val distancesCm = ObstacleDistancesDto(
 			frontDistance = (event.frontDist * 100).roundToInt(),
@@ -41,6 +43,7 @@ class RiskDetectionService(
 			leftDistance = (event.leftDist * 100).roundToInt(),
 			rightDistance = (event.rightDist * 100).roundToInt(),
 		)
+        val minDistanceCm = (minDistance * 100).roundToInt()
 
 		val coachingId = when {
 			distancesCm.backDistance <= DANGER_LIMIT_FRONT_BACK -> 1
@@ -53,10 +56,10 @@ class RiskDetectionService(
 		return CoachingSocketDto(
             step = step,
             timestamp = System.currentTimeMillis(),
-            targetAngle = targetAngle,
-            targetDistance = targetDistance,
-            currentAngle = event.handleAngle,
-            currentDistance = minDistance,
+            targetAngle = targetAngleDeg,
+            targetDistance = targetDistanceCm,
+            currentAngle = event.handleAngle.roundToInt(),
+            currentDistance = minDistanceCm,
 			distances = distancesCm,
             coachingId = coachingId,
         )

@@ -23,14 +23,14 @@ data class CoachingSocketDto(
 	val step: Int,
 	@field:Schema(description = "타임스탬프(ms)")
 	val timestamp: Long,
-	@field:Schema(description = "목표 각도")
-	val targetAngle: Double,
-	@field:Schema(description = "목표 거리")
-	val targetDistance: Double,
-	@field:Schema(description = "현재 각도")
-	val currentAngle: Double,
-	@field:Schema(description = "현재 거리")
-	val currentDistance: Double,
+    @field:Schema(description = "목표 각도(deg)")
+    val targetAngle: Int,
+    @field:Schema(description = "목표 이동 거리(cm)")
+    val targetDistance: Int,
+    @field:Schema(description = "현재 각도(deg)")
+    val currentAngle: Int,
+    @field:Schema(description = "현재 이동 거리(cm)")
+    val currentDistance: Int,
 	@field:Schema(description = "장애물 거리")
 	val distances: ObstacleDistancesDto,
 	@field:Schema(description = "코칭 ID")
