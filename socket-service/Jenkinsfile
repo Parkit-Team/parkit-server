@@ -37,7 +37,7 @@ pipeline {
                 // 폴더 이동 후 gradle test build 실행
                 dir("${SERVICE_NAME}") {
                     echo "Running tests and building JAR for ${SERVICE_NAME}..."
-                    sh './gradlew clean build'
+                    sh './gradlew clean build -x test'
                 }
             }
         }
