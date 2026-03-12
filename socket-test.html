@@ -26,7 +26,8 @@
     <div id="status" class="disconnected">Status: Disconnected</div>
     
     <div>
-        <button id="connectBtn" onclick="connect()">Connect</button>
+        <button id="connectRealBtn" onclick="connectReal()">Connect (Real)</button>
+        <button id="connectMockBtn" onclick="connectMock()">Connect (Mock)</button>
         <button id="disconnectBtn" onclick="disconnect()" disabled>Disconnect</button>
         <button onclick="clearMessages()">Clear</button>
     </div>
@@ -36,9 +37,9 @@
     <script>
         let stompClient = null;
 
-        function connect() {
+        function connect(endpointPath, topicPath) {
             // Spring Boot 서버의 STOMP 엔드포인트 주소
-            const socket = new SockJS('http://localhost:8082/ws/parkit');
+            const socket = new SockJS('http://localhost:8082' + endpointPath);
             stompClient = Stomp.over(socket);
 
             // STOMP 디버그 로그 비활성화 원하면 아래 줄 주석 해제
@@ -50,13 +51,14 @@
             stompClient.connect({}, function (frame) {
                 document.getElementById('status').innerText = 'Status: Connected';
                 document.getElementById('status').className = 'connected';
-                document.getElementById('connectBtn').disabled = true;
+                document.getElementById('connectRealBtn').disabled = true;
+                document.getElementById('connectMockBtn').disabled = true;
                 document.getElementById('disconnectBtn').disabled = false;
 
                 console.log('Connected: ' + frame);
 
-                // 서버가 보내주는 Topic(/topic/coaching)을 구독(Subscribe)
-                stompClient.subscribe('/topic/coaching', function (response) {
+                // 서버가 보내주는 Topic을 구독(Subscribe)
+                stompClient.subscribe(topicPath, function (response) {
                     const data = JSON.parse(response.body);
                     showMessage(data);
                 });
@@ -67,13 +69,22 @@
             });
         }
 
+        function connectReal() {
+            connect('/ws/parkit', '/topic/coaching');
+        }
+
+        function connectMock() {
+            connect('/ws/parkit-mock', '/topic/coaching-mock');
+        }
+
         function disconnect() {
             if (stompClient !== null) {
                 stompClient.disconnect();
             }
             document.getElementById('status').innerText = 'Status: Disconnected';
             document.getElementById('status').className = 'disconnected';
-            document.getElementById('connectBtn').disabled = false;
+            document.getElementById('connectRealBtn').disabled = false;
+            document.getElementById('connectMockBtn').disabled = false;
             document.getElementById('disconnectBtn').disabled = true;
             console.log("Disconnected");
         }
@@ -84,14 +95,34 @@
             messageElement.className = 'message-item';
             
             const timestamp = new Date(data.timestamp).toLocaleTimeString();
-            
-            messageElement.innerHTML = `
-                <strong>[${timestamp}]</strong> 
-                <span class="${data.warningLevel}">${data.warningLevel}</span> | 
-                Sensor: ${data.sensorId} | 
-                Distance: ${data.distance.toFixed(2)} cm | 
-                Message: ${data.message}
-            `;
+
+            // CoachingSocketDto (current)
+            if (typeof data.step === 'number' && typeof data.coachingId === 'number') {
+                const d = data.distances || {};
+                messageElement.innerHTML = `
+                    <strong>[${timestamp}]</strong>
+                    Step: ${data.step} | CoachingId: ${data.coachingId} |
+                    TargetAngle: ${Number(data.targetAngle).toFixed(2)} |
+                    TargetDist: ${Number(data.targetDistance).toFixed(2)} |
+                    CurrentAngle: ${Number(data.currentAngle).toFixed(2)} |
+                    CurrentDist: ${Number(data.currentDistance).toFixed(2)} |
+                    F/B/L/R: ${Number(d.frontDistance).toFixed(2)}/${Number(d.backDistance).toFixed(2)}/${Number(d.leftDistance).toFixed(2)}/${Number(d.rightDistance).toFixed(2)}
+                `;
+            }
+            // CoachingData (legacy)
+            else if (typeof data.warningLevel === 'string') {
+                messageElement.innerHTML = `
+                    <strong>[${timestamp}]</strong>
+                    <span class="${data.warningLevel}">${data.warningLevel}</span> |
+                    Sensor: ${data.sensorId} |
+                    Distance: ${data.distance.toFixed(2)} cm |
+                    Message: ${data.message}
+                `;
+            }
+            // Unknown
+            else {
+                messageElement.innerHTML = `<strong>[${timestamp}]</strong> ${JSON.stringify(data)}`;
+            }
             
             // 최신 메시지가 위로 오게 추가
             messagesDiv.insertBefore(messageElement, messagesDiv.firstChild);

@@ -28,6 +28,10 @@ dependencies {
 	implementation("org.jetbrains.kotlin:kotlin-reflect")
 	implementation("org.jetbrains.kotlinx:kotlinx-coroutines-reactor")
 	implementation("com.fasterxml.jackson.module:jackson-module-kotlin")
+	//프로메테우스 의존성 추가 (starter-actuator, Micrometer prometheus)
+	implementation("org.springframework.boot:spring-boot-starter-actuator")
+	implementation("io.micrometer:micrometer-registry-prometheus")
+
 	testImplementation("org.springframework.boot:spring-boot-starter-data-redis-reactive-test")
 	testImplementation("org.springframework.boot:spring-boot-starter-kafka-test")
 	testImplementation("org.springframework.boot:spring-boot-starter-webflux-test")

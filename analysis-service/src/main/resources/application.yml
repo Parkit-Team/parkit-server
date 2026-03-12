@@ -11,7 +11,7 @@ spring:
       port: 6379
 
   kafka:
-    bootstrap-servers: 127.0.0.1:9092
+    bootstrap-servers: my-kafka.parkit.svc.cluster.local:9092
     properties:
       api.version.request: true
     consumer:
@@ -22,6 +22,13 @@ spring:
     producer:
       key-serializer: org.apache.kafka.common.serialization.StringSerializer
       value-serializer: org.apache.kafka.common.serialization.StringSerializer
+
+parkit:
+  kafka:
+    topics:
+      sensor: sensor-topic
+      coachingEvent: coaching-event
+      parkingScoreResult: parking-score-result
 
 logging:
   level:
@@ -36,3 +43,13 @@ springdoc:
     path: /swagger-ui.html
   api-docs:
     path: /v3/api-docs
+
+# 프로메테우스 메트릭스 설정 추가
+management:
+  endpoints:
+    web:
+      exposure:
+        include: prometheus, metrics
+  endpoint:
+    prometheus:
+      enabled: true

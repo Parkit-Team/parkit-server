@@ -1,97 +1,48 @@
-# 🚗 Parkit (파킷)
-> 실시간 센서 데이터를 분석하여 최적의 주차 방법을 알려주는 코칭 서비스
-> "여기에 주차해라 / 주차를 해결하다 (Park + it)"
+# Parkit
+실시간 주차 센서 데이터를 기반으로 채점/코칭을 계산하고, 클라이언트에 WebSocket(STOMP)으로 전달하는 멀티 서비스 레포입니다.
 
-## 📌 서비스 개요
-- **의미:** 사용자가 고민 없이 바로 주차 결정을 할 수 있게 해주는 서비스
-- **목적:** 운전자의 주차 조작을 실시간으로 분석해 팁을 주는 독립형 코칭 서비스
-- **대상 고객:** 주차가 어려운 초보 운전자
+## Services
+- `analysis-service/` : Kafka 센서 이벤트 소비 → 주차 채점/코칭 계산 → Kafka 이벤트 발행
+- `socket-service/` : Kafka 코칭 이벤트 소비 → WebSocket(STOMP)으로 브로드캐스트
+- `report-service/` : 리포트/저장(별도 서비스)
 
-## 🎯 프로젝트 목표
-1. **실시간 코칭:** 차량 센서 데이터를 100ms 이내로 처리하여 즉각적인 주차 가이드 제공
-2. **안전성 확보:** 후방 장애물 근접 및 사고 위험 패턴을 감지하여 실시간 경고 송출
-3. **데이터 가시성:** 주차 세션별 분석 리포트와 점수를 시각화하여 운전자의 학습 효과 증대
-4. **클라우드 네이티브:** Kubernetes(k3s)와 Kafka를 활용하여 고가용성 및 확장성을 갖춘 인프라 구축
+## Data Flow (Local)
+1) `sensor-topic` (센서 이벤트) → analysis-service consume
+2) analysis-service 계산
+   - 코칭: `coaching-event`
+   - 채점: `parking-score-result`
+3) socket-service가 `coaching-event` consume 후 `/topic/coaching` 브로드캐스트
 
-## 🏗️ 시스템 아키텍처 및 기술 스택
-- **데이터 수집 (1번 팀):** Webots (자율주행 시뮬레이터), Python (Sensor Bridge), Kafka(Strimzi)
-- **실시간 분석 & 통신 (2번 팀):** Java, Spring Boot (Spring Kafka, Spring WebSocket/STOMP), Redis, PostgreSQL
-- **사용자 화면 & 관제 (3번 팀):** React, SockJS + STOMP 클라이언트, Prometheus, Grafana
-- **인프라:** Kubernetes (k3s), ArgoCD, Ingress Controller
+## WebSocket
+- Real endpoint: `http://localhost:8082/ws/parkit`
+- Real topic: `/topic/coaching`
+- Mock endpoint: `http://localhost:8082/ws/parkit-mock`
+- Mock topic: `/topic/coaching-mock`
+- 테스트 클라이언트: `socket-test.html`
 
-## 🧑‍🤝‍🧑 팀 구조 및 역할 (총 3개 유닛, 각 2인 1조)
-각 유닛은 **[개발 + 인프라 설정 + 모니터링]**을 모두 담당합니다.
+## Swagger
+- analysis-service: `http://localhost:8081/swagger-ui.html`
+- socket-service: `http://localhost:8082/swagger-ui.html`
 
-### 1. 플랫폼 & 메시징 유닛 (예은/희라)
-전체 시스템의 '운동장'과 '도로'를 관리하는 DevOps 핵심 엔지니어
-- **주요 개발:** Webots와 Kafka를 잇는 Sensor Bridge (Python) 개발
-- **DevOps 업무:** 
-  - K8s(k3s) 및 Kafka(Strimzi) 클러스터 설치 및 관리(초기 세팅)
-  - 팀 공용 CI/CD 파이프라인(ArgoCD) 구축
-  - Ingress Controller 설정 및 팀별 포트 할당
+## Run / Test
+이 레포는 루트 Gradle 빌드가 없습니다. 서비스 디렉토리에서 실행하세요.
 
-### 2. 실시간 분석 & 데이터 유닛 (리나/진)
-데이터가 흐르는 '파이프라인' 내부의 로직과 저장소 관리
-- **주요 개발:** 
-  - Kafka 데이터를 읽어 실시간으로 분석(Coaching)하는 비즈니스 로직 개발
-  - Spring WebSocket (STOMP) 기반의 실시간 양방향 통신 서버 구축
-- **DevOps 업무:**
-  - Redis와 PostgreSQL을 K8s 상에 StatefulSet으로 배포 및 관리
-  - Kafka Topic 설계 및 Partition 개수 등 성능 최적화
-  - 기하급수적으로 늘어날 데이터를 대비해 분석 서비스 HPA(Auto-scaling) 설정
+```bash
+# analysis-service
+cd analysis-service
+bash ./gradlew clean test
+bash ./gradlew bootRun
 
-### 3. 사용자 접점 & 관제 유닛 (채운/유하)
-사용자 화면과 전체 시스템의 '상태' 시각화
-- **주요 개발:**
-  - 실시간 코칭 웹(React) 프론트엔드 개발 및 통합 모니터링 대시보드 연동
-- **DevOps 업무:**
-  - Prometheus & Grafana 설치 및 각 서비스별 메트릭 수집 설정
-  - 모든 팀원이 확인할 수 있는 통합 관제 대시보드 구축
-  - 프론트엔드 서비스 K8s 배포 및 Ingress 외부 노출 관리
+# socket-service
+cd ../socket-service
+bash ./gradlew clean test
+bash ./gradlew bootRun
+```
 
-## 📅 전체 개발 일정 (10일 기획: 2/26 ~ 3/13)
+로컬 Kafka가 필요합니다(기본 `localhost:9092`).
 
-### 1. 환경 세팅 단계 (1~2일차: 02.26 목 - 02.27 금)
-- **1팀:** k3s 클러스터 설치, Strimzi로 Kafka 환경 구성, `sensor-raw` 토픽 생성
-- **2팀:** Spring Boot/Redis/Postgres 환경 셋업, K8s DB(StatefulSet) 배포, Kafka 통신 규격 설계
-- **3팀:** React 프로젝트 셋업, 프론트엔드 UI/UX 프로토타입 작성, Prometheus/Grafana 초기 설치
-
-### 2. 핵심 로직 개발 (3~4일차: 03.03 화 - 03.04 수)
-- **1팀:** Webots 시뮬레이터 세팅, Sensor Bridge(Python) 개발 돌입 및 Kafka 접속 테스트
-- **2팀:** Analysis Service(Kafka Consumer) 개발, 실시간 위험 감지 알고리즘 작성, Spring WebSocket 기본 골격 구현
-- **3팀:** 본격적인 React 컴포넌트 개발(코칭 메시지 UI, 속도/점수판 컴포넌트 등)
-
-### 3. 파이프라인 연결 및 통합 과정 (5~6일차: 03.05 목 - 03.06 금)
-*(프로젝트 코어 마일스톤 - 데이터가 흐르기 시작해야 함)*
-- **1팀:** Webots -> Sensor Bridge -> Kafka `sensor-raw` 토픽 실제 데이터 적재 확인
-- **2팀:** 수집된 데이터를 분석 후 즉시 WebSocket으로 쏘는 로직 완성. 1팀/3팀 간 E2E 통신 임시 연동 진행
-- **3팀:** React 앱에서 Spring STOMP 서버에 접속 성공, 실시간 JSON 데이터 파싱 및 UI 렌더링 검증
-
-### 4. 기능 고도화 및 인프라 최적화 (7~8일차: 03.09 월 - 03.10 화)
-- **1팀:** 데이터 파이프라인 데드락/보틀넥 확인 및 통신 안정화 지원
-- **2팀:** K8s HPA 세팅 적용, Kafka Consumer 병렬/배치 처리 최적화 완료, 분석이 끝난 세션 리포트를 PostgreSQL에 비동기 저장하는 로직 마련
-- **3팀:** Grafana 대시보드 커스터마이징 완료, 실제 데이터를 활용한 브라우저 단 최종 테스트수행
-
-### 5. GitOps 배포 경험 (9일차: 03.11 수)
-- **공통 과제:** 1팀이 구성한 ArgoCD 플랫폼 환경에 맞춰 2,3팀도 자체 서비스를 GitOps 방식으로 k3s에 배포 진행. Ingress를 통한 외부 포트 접속 확인
-
-### 6. 마무리 및 QA, 발표 (10~11일차: 03.12 목 - 03.13 금)
-- **공통 과제:** 운전 시나리오 기반 전체 End-to-End 동작 테스트 진행. (목표: 센서 발생 시점부터 브라우저 렌더링까지 100ms 이내 지연율 확보). 발표 데모 시나리오 준비 및 산출 문서화.
-
-## ⚠️ 핵심 의존성 (작업 병목 지점 주의)
-프로젝트 초기에 각 인터페이스 간의 협의가 팀 진행 속도에 지대한 영향을 미칩니다.
-1. **`sensor-raw` (Kafka Topic)**: 1번 팀에서 발행, 2번 팀에서 소비합니다. 데이터 스키마(예: `{ "sensor_id": 1, "distance": 15.2, "timestamp": ... }`)를 1~2일차에 최우선적으로 픽스해야 합니다.
-2. **`WebSocket (STOMP)`**: 2번 팀에서 송신, 3번 팀에서 수신합니다. 3번 팀이 지연 없이 프론트엔드를 찍어 낼 수 있도록, 2번 팀은 2~3일차 이내에 STOMP 엔드포인트명과 전달 데이터 포맷(예: 경고 레벨, 텍스트 메시지)을 정리해 공유해야 합니다.
-
-
-## ✅ 개발 규칙
-### 1. 브랜치 전략
-- `feature/{작업명}` (예: `feature/analysis-consumer`)
-- `fix/{버그명}` (예: `fix/websocket-cors`)
-- `infra/{작업명}` (예: `infra/setup-redis`)
- 
-### 2. Pull Request 및 리뷰
-- PR 본문에는 **변경 내용, 체크리스트, 리뷰 포인트** 작성
-- 병합 시에는 Squash and Merge 를 사용
-
-
+## Local Infra (Optional)
+```bash
+docker compose up -d
+```
+`docker-compose.yml`은 Postgres/Redis만 포함합니다.

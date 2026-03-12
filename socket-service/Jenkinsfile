@@ -3,7 +3,7 @@ pipeline {
 
     environment {
         // Define common variables
-        SERVICE_NAME = 'analysis-service'
+        SERVICE_NAME = 'socket-service'
         DOCKER_IMAGE_NAME = "parkitteam/${env.JOB_BASE_NAME.replace('-CI', '')}"
         DOCKER_TAG = "build-${env.BUILD_ID}"
     }
@@ -22,7 +22,7 @@ pipeline {
         }
 
         stage('Grant Permissions') {
-            when { changeset "analysis-service/**" }
+            when { changeset "socket-service/**" }
             steps {
                 // gradlew 파일 실행 권한 부여
                 dir("${SERVICE_NAME}") {
@@ -32,7 +32,7 @@ pipeline {
         }
 
         stage('Test & Build Jar') {
-            when { changeset "analysis-service/**" }
+            when { changeset "socket-service/**" }
             steps {
                 // 폴더 이동 후 gradle test build 실행
                 dir("${SERVICE_NAME}") {
@@ -43,7 +43,7 @@ pipeline {
         }
 
         stage('Build Docker Image') {
-            when { changeset "analysis-service/**" }
+            when { changeset "socket-service/**" }
             steps {
                 // 폴더 이동 후 Docker image build
                 dir("${SERVICE_NAME}") {
@@ -54,7 +54,6 @@ pipeline {
         }
 
         stage('Push Docker Image') {
-            when { changeset "analysis-service/**" }
             steps {
                 // Docker Hub에 이미지를 푸시
                 echo 'Pushing Docker Image to Docker Hub registry...'
@@ -65,19 +64,21 @@ pipeline {
                 }
             }
         }
-        //변경이 생긴 경우 argocd-parkit 래포의 manifest 파일에서도 이미지 태그가 업데이트
         stage('Update K8s Manifests') {
-            when { changeset "analysis-service/**" }
+            when { changeset "socket-service/**" }
             steps {
                 echo 'Updating image tag in argocd-parkit repository...'
                 withCredentials([usernamePassword(credentialsId: 'github-credentials', passwordVariable: 'GIT_PASSWORD', usernameVariable: 'GIT_USERNAME')]) {
                     sh """
-                        git clone https://${GIT_USERNAME}:${GIT_PASSWORD}@github.com/Parkit-Team/argocd-parkit.git
-                        cd argocd-parkit
+                        # 남아있는 폴더 삭제
+                        rm -rf argocd-parkit
 
+                        # 새로 클론
+                        git clone https://${GIT_USERNAME}:${GIT_PASSWORD}@github.com/Parkit-Team/argocd-parkit.git
+                        
+                        cd argocd-parkit
                         sed -i 's|image: ${DOCKER_IMAGE_NAME}:.*|image: ${DOCKER_IMAGE_NAME}:${DOCKER_TAG}|g' \
                             ${SERVICE_NAME}/deployment.yaml
-
                         git config user.email "jenkins@ci.com"
                         git config user.name "Jenkins CI"
                         git add ${SERVICE_NAME}/deployment.yaml
@@ -87,6 +88,7 @@ pipeline {
                 }
             }
         }
+
         stage('Cleanup') {
             steps {
                 // 필요없는 도커 이미지 삭제
