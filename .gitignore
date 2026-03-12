@@ -30,3 +30,4 @@ replay_pid*
 
 # Local build outputs
 analysis-service/build_out*.txt
+report-service/build_output*.txt
