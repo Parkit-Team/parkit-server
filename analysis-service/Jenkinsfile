@@ -22,7 +22,7 @@ pipeline {
         }
 
         stage('Grant Permissions') {
-            //when { changeset "analysis-service/**" }
+            when { changeset "analysis-service/**" }
             steps {
                 // gradlew 파일 실행 권한 부여
                 dir("${SERVICE_NAME}") {
@@ -32,7 +32,7 @@ pipeline {
         }
 
         stage('Test & Build Jar') {
-            //when { changeset "analysis-service/**" }
+            when { changeset "analysis-service/**" }
             steps {
                 // 폴더 이동 후 build 실행
                 dir("${SERVICE_NAME}") {
@@ -43,7 +43,7 @@ pipeline {
         }
 
         stage('Build Docker Image') {
-            //when { changeset "analysis-service/**" }
+            when { changeset "analysis-service/**" }
             steps {
                 // 폴더 이동 후 Docker image build
                 dir("${SERVICE_NAME}") {
@@ -54,7 +54,7 @@ pipeline {
         }
 
         stage('Push Docker Image') {
-            //when { changeset "analysis-service/**" }
+            when { changeset "analysis-service/**" }
             steps {
                 // Docker Hub에 이미지를 푸시
                 echo 'Pushing Docker Image to Docker Hub registry...'
@@ -67,7 +67,7 @@ pipeline {
         }
         //변경이 생긴 경우 argocd-parkit 래포의 manifest 파일에서도 이미지 태그가 업데이트
         stage('Update K8s Manifests') {
-            //when { changeset "analysis-service/**" }
+            when { changeset "analysis-service/**" }
             steps {
                 echo 'Updating image tag in argocd-parkit repository...'
                 withCredentials([usernamePassword(credentialsId: 'github-credentials', passwordVariable: 'GIT_PASSWORD', usernameVariable: 'GIT_USERNAME')]) {

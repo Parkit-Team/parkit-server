@@ -22,7 +22,7 @@ pipeline {
         }
 
         stage('Grant Permissions') {
-            //when { changeset "socket-service/**" }
+            when { changeset "socket-service/**" }
             steps {
                 // gradlew 파일 실행 권한 부여
                 dir("${SERVICE_NAME}") {
@@ -32,7 +32,7 @@ pipeline {
         }
 
         stage('Test & Build Jar') {
-            //when { changeset "socket-service/**" }
+            when { changeset "socket-service/**" }
             steps {
                 // 폴더 이동 후 gradle test build 실행
                 dir("${SERVICE_NAME}") {
@@ -43,7 +43,7 @@ pipeline {
         }
 
         stage('Build Docker Image') {
-            //when { changeset "socket-service/**" }
+            when { changeset "socket-service/**" }
             steps {
                 // 폴더 이동 후 Docker image build
                 dir("${SERVICE_NAME}") {
@@ -66,7 +66,7 @@ pipeline {
             }
         }
         stage('Update K8s Manifests') {
-            //when { changeset "socket-service/**" }
+            when { changeset "socket-service/**" }
             steps {
                 echo 'Updating image tag in argocd-parkit repository...'
                 withCredentials([usernamePassword(credentialsId: 'github-credentials', passwordVariable: 'GIT_PASSWORD', usernameVariable: 'GIT_USERNAME')]) {
