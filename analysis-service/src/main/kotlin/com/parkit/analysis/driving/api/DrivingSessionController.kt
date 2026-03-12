@@ -7,7 +7,6 @@ import com.parkit.analysis.driving.api.dto.StopDrivingSessionRequest
 import com.parkit.analysis.driving.service.DrivingSessionService
 import com.parkit.analysis.driving.persistence.document.DrivingSessionDocument
 import com.parkit.analysis.driving.persistence.document.SensorLogDocument
-import com.parkit.analysis.driving.persistence.repository.SensorLogMongoRepository
 import com.parkit.analysis.driving.service.SensorLogService
 import io.swagger.v3.oas.annotations.Operation
 import io.swagger.v3.oas.annotations.Parameter
@@ -36,7 +35,6 @@ import reactor.core.publisher.Mono
 class DrivingSessionController(
 	private val drivingSessionService: DrivingSessionService,
 	private val sensorLogService: SensorLogService,
-	private val sensorLogRepository: SensorLogMongoRepository,
 ) {
 	@PostMapping("/start")
 	@ResponseStatus(HttpStatus.CREATED)
@@ -99,5 +97,5 @@ class DrivingSessionController(
 		@PathVariable sessionId: String,
 		@Parameter(description = "최대 반환 개수", example = "2000")
 		@RequestParam(required = false, defaultValue = "2000") limit: Long,
-	): Flux<SensorLogDocument> = sensorLogRepository.findBySessionIdOrderByTimeAsc(sessionId).take(limit)
+	): Flux<SensorLogDocument> = sensorLogService.getSensorLogs(sessionId, limit)
 }
