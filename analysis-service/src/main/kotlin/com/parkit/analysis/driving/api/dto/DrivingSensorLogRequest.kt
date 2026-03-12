@@ -4,26 +4,6 @@ import com.fasterxml.jackson.annotation.JsonProperty
 import com.parkit.analysis.kafka.dto.ParkingSensorDto
 import io.swagger.v3.oas.annotations.media.Schema
 
-@Schema(description = "주행 세션 시작 요청")
-data class StartDrivingSessionRequest(
-	@field:Schema(description = "사용자 ID(옵션)", example = "user-123")
-	val userId: String? = null,
-)
-
-@Schema(description = "주행 세션 시작 응답")
-data class StartDrivingSessionResponse(
-	@field:Schema(description = "주행 세션 ID")
-	val sessionId: String,
-	@field:Schema(description = "세션 시작 시간(UTC)")
-	val startedAt: java.time.Instant,
-)
-
-@Schema(description = "주행 세션 종료 요청")
-data class StopDrivingSessionRequest(
-	@field:Schema(description = "프론트에서 계산한 점수", example = "87.5")
-	val frontendScore: Double,
-)
-
 @Schema(description = "센서 로그 단건 저장 요청")
 data class DrivingSensorLogRequest(
 	@field:Schema(description = "센서 이벤트 time(원본 필드)")
