@@ -2,6 +2,7 @@ package com.parkit.report.driving.service
 
 import com.parkit.report.driving.domain.DrivingSessionStatus
 import com.parkit.report.driving.persistence.document.DrivingSessionDocument
+import com.parkit.report.driving.persistence.document.SensorLogDocument
 import com.parkit.report.driving.persistence.repository.DrivingSessionMongoRepository
 
 import org.springframework.data.mongodb.core.FindAndModifyOptions
@@ -14,7 +15,6 @@ import org.springframework.web.server.ResponseStatusException
 import java.time.Clock
 import java.time.Instant
 import java.util.UUID
-import org.springframework.data.domain.Sort
 import org.springframework.http.HttpStatus
 
 @Service
@@ -53,19 +53,30 @@ class DrivingSessionService(
 			stoppedAt = now,
 			frontendScore = frontendScore,
 		)
-		return drivingSessionRepository.save(updated)
+		val savedSession = drivingSessionRepository.save(updated)
+
+		// stop 시점에 해당 세션의 모든 센서 로그에 점수를 일괄 반영
+		val scoreQuery = Query(Criteria.where("sessionId").`is`(sessionId))
+		val scoreUpdate = Update().set("frontendScore", frontendScore)
+		mongoTemplate.updateMulti(scoreQuery, scoreUpdate, SensorLogDocument::class.java)
+
+		return savedSession
 	}
 
 	fun findLatestRunning(): DrivingSessionDocument? =
 		drivingSessionRepository.findFirstByStatusOrderByStartedAtDesc(DrivingSessionStatus.RUNNING).orElse(null)
 
+	fun findRunningById(sessionId: String): DrivingSessionDocument? =
+		drivingSessionRepository.findById(sessionId).orElse(null)?.takeIf { it.status == DrivingSessionStatus.RUNNING }
+
 	fun get(sessionId: String): DrivingSessionDocument =
 		drivingSessionRepository.findById(sessionId)
 			.orElseThrow { ResponseStatusException(HttpStatus.NOT_FOUND, "Session not found") }
 
-	fun attachFirstSensorPayloadIfAbsent(messageJson: String): DrivingSessionDocument? {
+	fun attachFirstSensorPayloadIfAbsent(sessionId: String, messageJson: String): DrivingSessionDocument? {
 		val now = Instant.now(clock)
 		val query = Query()
+			.addCriteria(Criteria.where("id").`is`(sessionId))
 			.addCriteria(Criteria.where("status").`is`(DrivingSessionStatus.RUNNING))
 			.addCriteria(
 				Criteria().orOperator(
@@ -73,8 +84,6 @@ class DrivingSessionService(
 					Criteria.where("firstSensorPayloadJson").`is`(null),
 				),
 			)
-			.with(Sort.by(Sort.Direction.DESC, "startedAt"))
-			.limit(1)
 
 		val update = Update()
 			.set("firstSensorPayloadJson", messageJson)
