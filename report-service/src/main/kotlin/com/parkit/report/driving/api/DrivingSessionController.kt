@@ -1,13 +1,13 @@
-package com.parkit.analysis.driving.api
+package com.parkit.report.driving.api
 
-import com.parkit.analysis.driving.api.dto.DrivingSensorLogRequest
-import com.parkit.analysis.driving.api.dto.StartDrivingSessionRequest
-import com.parkit.analysis.driving.api.dto.StartDrivingSessionResponse
-import com.parkit.analysis.driving.api.dto.StopDrivingSessionRequest
-import com.parkit.analysis.driving.service.DrivingSessionService
-import com.parkit.analysis.driving.persistence.document.DrivingSessionDocument
-import com.parkit.analysis.driving.persistence.document.SensorLogDocument
-import com.parkit.analysis.driving.service.SensorLogService
+import com.parkit.report.driving.api.dto.DrivingSensorLogRequest
+import com.parkit.report.driving.api.dto.StartDrivingSessionRequest
+import com.parkit.report.driving.api.dto.StartDrivingSessionResponse
+import com.parkit.report.driving.api.dto.StopDrivingSessionRequest
+import com.parkit.report.driving.service.DrivingSessionService
+import com.parkit.report.driving.persistence.document.DrivingSessionDocument
+import com.parkit.report.driving.persistence.document.SensorLogDocument
+import com.parkit.report.driving.service.SensorLogService
 import io.swagger.v3.oas.annotations.Operation
 import io.swagger.v3.oas.annotations.Parameter
 import io.swagger.v3.oas.annotations.media.Content
@@ -23,8 +23,6 @@ import org.springframework.web.bind.annotation.RequestMapping
 import org.springframework.web.bind.annotation.RequestParam
 import org.springframework.web.bind.annotation.ResponseStatus
 import org.springframework.web.bind.annotation.RestController
-import reactor.core.publisher.Flux
-import reactor.core.publisher.Mono
 
 @RestController
 @RequestMapping("/api/driving-sessions")
@@ -45,9 +43,10 @@ class DrivingSessionController(
 	@ApiResponses(
 		ApiResponse(responseCode = "201", description = "세션 생성 또는 기존 RUNNING 세션 반환"),
 	)
-	fun start(@RequestBody(required = false) request: StartDrivingSessionRequest?): Mono<StartDrivingSessionResponse> =
-		drivingSessionService.start(request?.userId)
-			.map { StartDrivingSessionResponse(sessionId = it.id, startedAt = it.startedAt) }
+	fun start(@RequestBody(required = false) request: StartDrivingSessionRequest?): StartDrivingSessionResponse {
+		val session = drivingSessionService.start(request?.userId)
+		return StartDrivingSessionResponse(sessionId = session.id, startedAt = session.startedAt)
+	}
 
 	@PostMapping("/{sessionId}/stop")
 	@Operation(
@@ -62,7 +61,7 @@ class DrivingSessionController(
 		@Parameter(description = "주행 세션 ID", required = true)
 		@PathVariable sessionId: String,
 		@RequestBody request: StopDrivingSessionRequest,
-	): Mono<DrivingSessionDocument> = drivingSessionService.stop(sessionId, request.frontendScore)
+	): DrivingSessionDocument = drivingSessionService.stop(sessionId, request.frontendScore)
 
 	@PostMapping("/{sessionId}/sensor-logs")
 	@ResponseStatus(HttpStatus.CREATED)
@@ -77,7 +76,7 @@ class DrivingSessionController(
 		@Parameter(description = "주행 세션 ID", required = true)
 		@PathVariable sessionId: String,
 		@RequestBody request: DrivingSensorLogRequest,
-	): Mono<SensorLogDocument> = sensorLogService.append(sessionId, request.toDto())
+	): SensorLogDocument = sensorLogService.append(sessionId, request.toDto())
 
 	@GetMapping("/{sessionId}")
 	@Operation(summary = "주행 세션 조회")
@@ -85,7 +84,7 @@ class DrivingSessionController(
 		ApiResponse(responseCode = "200", description = "조회 성공"),
 		ApiResponse(responseCode = "404", description = "세션을 찾을 수 없음", content = [Content()]),
 	)
-	fun get(@PathVariable sessionId: String): Mono<DrivingSessionDocument> = drivingSessionService.get(sessionId)
+	fun get(@PathVariable sessionId: String): DrivingSessionDocument = drivingSessionService.get(sessionId)
 
 	@GetMapping("/{sessionId}/sensor-logs")
 	@Operation(
@@ -97,5 +96,5 @@ class DrivingSessionController(
 		@PathVariable sessionId: String,
 		@Parameter(description = "최대 반환 개수", example = "2000")
 		@RequestParam(required = false, defaultValue = "2000") limit: Long,
-	): Flux<SensorLogDocument> = sensorLogService.getSensorLogs(sessionId, limit)
+	): List<SensorLogDocument> = sensorLogService.getSensorLogs(sessionId, limit)
 }

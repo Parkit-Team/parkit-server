@@ -1,11 +1,9 @@
-package com.parkit.analysis.driving.service
+package com.parkit.report.driving.service
 
-import com.parkit.analysis.driving.persistence.document.SensorLogDocument
-import com.parkit.analysis.driving.persistence.repository.SensorLogMongoRepository
-import com.parkit.analysis.kafka.dto.ParkingSensorDto
+import com.parkit.report.driving.persistence.document.SensorLogDocument
+import com.parkit.report.driving.persistence.repository.SensorLogMongoRepository
+import com.parkit.report.kafka.dto.ParkingSensorDto
 import org.springframework.stereotype.Service
-import reactor.core.publisher.Flux
-import reactor.core.publisher.Mono
 import java.time.Clock
 import java.time.Instant
 
@@ -14,7 +12,7 @@ class SensorLogService(
 	private val sensorLogRepository: SensorLogMongoRepository,
 	private val clock: Clock = Clock.systemUTC(),
 ) {
-	fun append(sessionId: String, event: ParkingSensorDto): Mono<SensorLogDocument> {
+	fun append(sessionId: String, event: ParkingSensorDto): SensorLogDocument {
 		val now = Instant.now(clock)
 		val doc = SensorLogDocument(
 			sessionId = sessionId,
@@ -35,6 +33,6 @@ class SensorLogService(
 		return sensorLogRepository.save(doc)
 	}
 
-	fun getSensorLogs(sessionId: String, limit: Long): Flux<SensorLogDocument> =
-		sensorLogRepository.findBySessionIdOrderByTimeAsc(sessionId).take(limit)
+	fun getSensorLogs(sessionId: String, limit: Long): List<SensorLogDocument> =
+		sensorLogRepository.findBySessionIdOrderByTimeAsc(sessionId).take(limit.toInt())
 }

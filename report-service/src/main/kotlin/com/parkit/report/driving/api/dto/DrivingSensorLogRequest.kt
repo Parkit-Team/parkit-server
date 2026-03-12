@@ -1,7 +1,7 @@
-package com.parkit.analysis.driving.api.dto
+package com.parkit.report.driving.api.dto
 
 import com.fasterxml.jackson.annotation.JsonProperty
-import com.parkit.analysis.kafka.dto.ParkingSensorDto
+import com.parkit.report.kafka.dto.ParkingSensorDto
 import io.swagger.v3.oas.annotations.media.Schema
 
 @Schema(description = "센서 로그 단건 저장 요청")

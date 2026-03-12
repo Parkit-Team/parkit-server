@@ -1,0 +1,120 @@
+﻿> Task :checkKotlinGradlePluginConfigurationErrors SKIPPED
+
+> Task :compileKotlin FAILED
+.\gradlew : e: file:///C:
+/Users/rinaa/Desktop/park
+it-server/report-service/
+src/main/kotlin/com/parki
+t/report/domain/CoachingR
+eport.kt:3:16 Unresolved 
+reference 'persistence'.
+위치 줄:1 문자:1
++ .\gradlew compileKotlin
+ > build_output.txt 2>&1
++ ~~~~~~~~~~~~~~~~~~~~~~~
+~~~~~~~~~~~~~~~~~~~~~~~~
+    + CategoryInfo       
+       : NotSpecified:   
+  (e: file:///C:/U...    
+ 'persistence'.:Strin    
+g) [], RemoteExcepti    o
+n
+    + FullyQualifiedErro 
+   rId : NativeCommandE  
+  rror
+ 
+e: file:///C:/Users/rinaa
+/Desktop/parkit-server/re
+port-service/src/main/kot
+lin/com/parkit/report/dom
+ain/CoachingReport.kt:6:2
+ Unresolved reference 'En
+tity'.
+e: file:///C:/Users/rinaa
+/Desktop/parkit-server/re
+port-service/src/main/kot
+lin/com/parkit/report/dom
+ain/CoachingReport.kt:7:2
+ Unresolved reference 'Ta
+ble'.
+e: file:///C:/Users/rinaa
+/Desktop/parkit-server/re
+port-service/src/main/kot
+lin/com/parkit/report/dom
+ain/CoachingReport.kt:9:6
+ Unresolved reference 'Id
+'.
+e: file:///C:/Users/rinaa
+/Desktop/parkit-server/re
+port-service/src/main/kot
+lin/com/parkit/report/dom
+ain/CoachingReport.kt:10:
+6 Unresolved reference 'G
+eneratedValue'.
+e: file:///C:/Users/rinaa
+/Desktop/parkit-server/re
+port-service/src/main/kot
+lin/com/parkit/report/dom
+ain/CoachingReport.kt:10:
+32 Unresolved reference '
+GenerationType'.
+e: file:///C:/Users/rinaa
+/Desktop/parkit-server/re
+port-service/src/main/kot
+lin/com/parkit/report/dom
+ain/CoachingReport.kt:13:
+6 Unresolved reference 'C
+olumn'.
+e: file:///C:/Users/rinaa
+/Desktop/parkit-server/re
+port-service/src/main/kot
+lin/com/parkit/report/dom
+ain/CoachingReport.kt:16:
+6 Unresolved reference 'C
+olumn'.
+e: file:///C:/Users/rinaa
+/Desktop/parkit-server/re
+port-service/src/main/kot
+lin/com/parkit/report/dom
+ain/CoachingReport.kt:19:
+6 Unresolved reference 'C
+olumn'.
+e: file:///C:/Users/rinaa
+/Desktop/parkit-server/re
+port-service/src/main/kot
+lin/com/parkit/report/dom
+ain/CoachingReport.kt:22:
+6 Unresolved reference 'C
+olumn'.
+
+FAILURE: Build failed wit
+h an exception.
+
+* What went wrong:
+Execution failed for task
+ ':compileKotlin'.
+> A failure occurred whil
+e executing org.jetbrains
+.kotlin.compilerRunner.Gr
+adleCompilerRunnerWithWor
+kers$GradleKotlinCompiler
+WorkAction
+   > Compilation error. S
+ee log for more details
+
+* Try:
+> Run with --stacktrace o
+ption to get the stack tr
+ace.
+> Run with --info or --de
+bug option to get more lo
+g output.
+> Run with --scan to get 
+full insights from a Buil
+d Scan (powered by Develo
+city).
+> Get more help at https:
+//help.gradle.org.
+
+BUILD FAILED in 5s
+1 actionable task: 1 executed

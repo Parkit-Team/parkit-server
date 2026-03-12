@@ -1,4 +1,4 @@
-package com.parkit.analysis.driving.domain
+package com.parkit.report.driving.domain
 
 import io.swagger.v3.oas.annotations.media.Schema
 

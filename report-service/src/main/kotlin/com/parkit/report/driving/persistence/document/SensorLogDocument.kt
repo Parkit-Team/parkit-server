@@ -1,4 +1,4 @@
-package com.parkit.analysis.driving.persistence.document
+package com.parkit.report.driving.persistence.document
 
 import io.swagger.v3.oas.annotations.media.Schema
 import org.springframework.data.annotation.Id

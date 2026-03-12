@@ -1,0 +1,151 @@
+﻿.\gradlew : e: file:///C:
+/Users/rinaa/Desktop/park
+it-server/analysis-servic
+e/src/main/kotlin/com/par
+kit/analysis/kafka/KafkaA
+nalysisConsumer.kt:6:28 U
+nresolved reference 'driv
+ing'.
+위치 줄:1 문자:1
++ .\gradlew compileKotlin
+ -q > build_out.txt 2>&1 
+| Out-Null
++ ~~~~~~~~~~~~~~~~~~~~~~~
+~~~~~~~~~~~~~~~~~~~~~~~~
+    + CategoryInfo       
+       : NotSpecified:   
+  (e: file:///C:/U...e   
+ nce 'driving'.:Strin    
+g) [], RemoteExcepti    o
+n
+    + FullyQualifiedErro 
+   rId : NativeCommandE  
+  rror
+ 
+e: file:///C:/Users/rinaa
+/Desktop/parkit-server/an
+alysis-service/src/main/k
+otlin/com/parkit/analysis
+/kafka/KafkaAnalysisConsu
+mer.kt:7:28 Unresolved re
+ference 'driving'.
+e: file:///C:/Users/rinaa
+/Desktop/parkit-server/an
+alysis-service/src/main/k
+otlin/com/parkit/analysis
+/kafka/KafkaAnalysisConsu
+mer.kt:23:37 Unresolved r
+eference 'DrivingSessionS
+ervice'.
+e: file:///C:/Users/rinaa
+/Desktop/parkit-server/an
+alysis-service/src/main/k
+otlin/com/parkit/analysis
+/kafka/KafkaAnalysisConsu
+mer.kt:24:32 Unresolved r
+eference 'SensorLogServic
+e'.
+e: file:///C:/Users/rinaa
+/Desktop/parkit-server/an
+alysis-service/src/main/k
+otlin/com/parkit/analysis
+/kafka/KafkaAnalysisConsu
+mer.kt:46:26 Unresolved r
+eference 'findLatestRunni
+ng'.
+e: file:///C:/Users/rinaa
+/Desktop/parkit-server/an
+alysis-service/src/main/k
+otlin/com/parkit/analysis
+/kafka/KafkaAnalysisConsu
+mer.kt:53:16 Cannot infer
+ type for value parameter
+ 'session'. Specify it ex
+plicitly.
+e: file:///C:/Users/rinaa
+/Desktop/parkit-server/an
+alysis-service/src/main/k
+otlin/com/parkit/analysis
+/kafka/KafkaAnalysisConsu
+mer.kt:54:30 Unresolved r
+eference 'id'.
+e: file:///C:/Users/rinaa
+/Desktop/parkit-server/an
+alysis-service/src/main/k
+otlin/com/parkit/analysis
+/kafka/KafkaAnalysisConsu
+mer.kt:56:8 Unresolved re
+ference 'then'.
+e: file:///C:/Users/rinaa
+/Desktop/parkit-server/an
+alysis-service/src/main/k
+otlin/com/parkit/analysis
+/kafka/KafkaAnalysisConsu
+mer.kt:58:19 Cannot infer
+ type for value parameter
+ 'result'. Specify it exp
+licitly.
+e: file:///C:/Users/rinaa
+/Desktop/parkit-server/an
+alysis-service/src/main/k
+otlin/com/parkit/analysis
+/kafka/KafkaAnalysisConsu
+mer.kt:59:46 Function inv
+ocation 'step(...)' expec
+ted.
+e: file:///C:/Users/rinaa
+/Desktop/parkit-server/an
+alysis-service/src/main/k
+otlin/com/parkit/analysis
+/kafka/KafkaAnalysisConsu
+mer.kt:68:8 Cannot infer 
+type for type parameter '
+T'. Specify it explicitly
+.
+e: file:///C:/Users/rinaa
+/Desktop/parkit-server/an
+alysis-service/src/main/k
+otlin/com/parkit/analysis
+/kafka/KafkaAnalysisConsu
+mer.kt:70:6 Unresolved re
+ference 'subscribe'.
+e: file:///C:/Users/rinaa
+/Desktop/parkit-server/an
+alysis-service/src/main/k
+otlin/com/parkit/analysis
+/kafka/KafkaAnalysisConsu
+mer.kt:72:8 Cannot infer 
+type for value parameter 
+'error'. Specify it expli
+citly.
+
+FAILURE: Build failed wit
+h an exception.
+
+* What went wrong:
+Execution failed for task
+ ':compileKotlin'.
+> A failure occurred whil
+e executing org.jetbrains
+.kotlin.compilerRunner.Gr
+adleCompilerRunnerWithWor
+kers$GradleKotlinCompiler
+WorkAction
+   > Compilation error. S
+ee log for more details
+
+* Try:
+> Run with --stacktrace o
+ption to get the stack tr
+ace.
+> Run with --info or --de
+bug option to get more lo
+g output.
+> Run with --scan to get 
+full insights from a Buil
+d Scan (powered by Develo
+city).
+> Get more help at https:
+//help.gradle.org.
+
+BUILD FAILED in 7s

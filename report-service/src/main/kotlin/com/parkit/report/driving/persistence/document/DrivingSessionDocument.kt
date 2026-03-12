@@ -1,6 +1,6 @@
-package com.parkit.analysis.driving.persistence.document
+package com.parkit.report.driving.persistence.document
 
-import com.parkit.analysis.driving.domain.DrivingSessionStatus
+import com.parkit.report.driving.domain.DrivingSessionStatus
 
 import io.swagger.v3.oas.annotations.media.Schema
 import org.springframework.data.annotation.Id
