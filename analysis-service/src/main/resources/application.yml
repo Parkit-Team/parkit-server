@@ -12,7 +12,7 @@ spring:
     mongodb:
       uri: ${PARKIT_MONGODB_URI:mongodb://mongodb-service:27017/analysis_db}
   kafka:
-    bootstrap-servers: my-kafka:9092
+    bootstrap-servers: ${SPRING_KAFKA_BOOTSTRAP_SERVERS:localhost:9092}
     properties:
       api.version.request: true
     consumer:

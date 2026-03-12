@@ -8,13 +8,13 @@ import io.swagger.v3.oas.annotations.media.Schema
 @Schema(description = "장애물 거리 정보")
 data class ObstacleDistancesDto(
 	@field:Schema(description = "전방 거리")
-	val frontDistance: Double,
+	val frontDistance: Int,
 	@field:Schema(description = "후방 거리")
-	val backDistance: Double,
+	val backDistance: Int,
 	@field:Schema(description = "좌측 거리")
-	val leftDistance: Double,
+	val leftDistance: Int,
 	@field:Schema(description = "우측 거리")
-	val rightDistance: Double,
+	val rightDistance: Int,
 )
 
 @Schema(description = "코칭 메시지")
