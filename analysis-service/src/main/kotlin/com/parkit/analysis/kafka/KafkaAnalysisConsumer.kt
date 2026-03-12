@@ -19,9 +19,9 @@ class KafkaAnalysisConsumer(
     private val parkingScoringService: ParkingScoringService,
     private val kafkaTemplate: KafkaTemplate<String, String>,
     private val objectMapper: ObjectMapper,
-    @Value("{parkit.kafka.topics.coachingEvent}")
+    @Value("\${parkit.kafka.topics.coachingEvent}")
     private val coachingEventTopic: String,
-    @Value("{parkit.kafka.topics.parkingScoreResult}")
+    @Value("\${parkit.kafka.topics.parkingScoreResult}")
     private val parkingScoreResultTopic: String,
 ) {
     private val log = LoggerFactory.getLogger(KafkaAnalysisConsumer::class.java)
@@ -29,7 +29,7 @@ class KafkaAnalysisConsumer(
     /**
      * 타겟 토픽(sensor-topic)을 구독
      */
-    @KafkaListener(topics = ["{parkit.kafka.topics.sensor}"])
+    @KafkaListener(topics = ["\${parkit.kafka.topics.sensor}"])
     fun consume(message: String) {
         try {
             // 수신 된 JSON 페이로드를 ParkingSensorEvent 객체로 역직렬화
