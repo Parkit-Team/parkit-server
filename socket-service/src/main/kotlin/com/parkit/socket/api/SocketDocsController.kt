@@ -4,6 +4,7 @@ import com.parkit.socket.dto.CoachingSocketDto
 import io.swagger.v3.oas.annotations.Operation
 import io.swagger.v3.oas.annotations.media.Schema
 import io.swagger.v3.oas.annotations.tags.Tag
+import org.springframework.beans.factory.annotation.Value
 import org.springframework.web.bind.annotation.GetMapping
 import org.springframework.web.bind.annotation.RequestMapping
 import org.springframework.web.bind.annotation.RestController
@@ -15,15 +16,26 @@ import org.springframework.web.bind.annotation.RestController
 	description = "Swagger(OpenAPI)는 WebSocket(STOMP) 메시지 채널을 자동으로 문서화하지 못합니다. 대신 연결 엔드포인트와 토픽/메시지 스키마를 안내하는 HTTP 문서 엔드포인트를 제공합니다.",
 )
 class SocketDocsController {
+	@Value("\${parkit.mock.coaching.enabled:false}")
+	private val mockEnabled: Boolean = false
+
 	@GetMapping("/ws-info")
 	@Operation(
 		summary = "WebSocket(STOMP) 사용 안내",
 		description = "클라이언트가 연결해야 하는 STOMP 엔드포인트(/ws/parkit)와 subscribe/send destination 규칙을 반환합니다.",
 	)
-	fun wsInfo(): WebSocketInfoResponse = WebSocketInfoResponse(
-		stompEndpoints = listOf("/ws/parkit", "/ws/parkit-mock"),
+	fun wsInfo(): WebSocketInfoResponse {
+		val endpoints = mutableListOf("/ws/parkit")
+		val subscribe = mutableListOf("/topic/coaching")
+		if (mockEnabled) {
+			endpoints.add("/ws/parkit-mock")
+			subscribe.add("/topic/coaching-mock")
+		}
+
+		return WebSocketInfoResponse(
+			stompEndpoints = endpoints,
 		applicationDestinationPrefix = "/app",
-		subscribeDestinations = listOf("/topic/coaching", "/topic/coaching-mock"),
+			subscribeDestinations = subscribe,
 		messageSchemas = listOf(
 			MessageSchema(
 				name = "CoachingSocketDto",
@@ -31,7 +43,8 @@ class SocketDocsController {
 				javaType = CoachingSocketDto::class.qualifiedName ?: "com.parkit.socket.dto.CoachingSocketDto",
 			),
 		),
-	)
+		)
+	}
 }
 
 @Schema(description = "WebSocket(STOMP) 사용 안내 응답")
