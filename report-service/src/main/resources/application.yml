@@ -21,10 +21,7 @@ spring:
         dialect: org.hibernate.dialect.PostgreSQLDialect
 
   kafka:
-    bootstrap-servers:
-      - my-kafka-0.my-kafka:9092
-      - my-kafka-1.my-kafka:9092
-      - my-kafka-2.my-kafka:9092
+    bootstrap-servers: my-kafka:9092
     consumer:
       group-id: report-group
       auto-offset-reset: latest

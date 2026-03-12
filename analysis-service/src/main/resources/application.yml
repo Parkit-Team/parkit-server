@@ -11,10 +11,7 @@ spring:
       port: 6379
 
   kafka:
-    bootstrap-servers:
-      - my-kafka-0.my-kafka:9092
-      - my-kafka-1.my-kafka:9092
-      - my-kafka-2.my-kafka:9092
+    bootstrap-servers: my-kafka:9092
     properties:
       api.version.request: true
     consumer:
