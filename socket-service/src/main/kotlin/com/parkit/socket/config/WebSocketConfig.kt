@@ -23,10 +23,5 @@ class WebSocketConfig : WebSocketMessageBrokerConfigurer {
 		registry.addEndpoint("/ws/parkit")
 			.setAllowedOriginPatterns("*") // 실제 운영 시에는 프론트엔드 도메인으로 제한
 			.withSockJS() // SockJS 폴백 옵션 활성화
-
-		// 로컬 테스트/데모용 mock 엔드포인트
-		registry.addEndpoint("/ws/parkit-mock")
-			.setAllowedOriginPatterns("*")
-			.withSockJS()
 	}
 }
