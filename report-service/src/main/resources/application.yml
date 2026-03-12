@@ -7,10 +7,10 @@ spring:
   
   data:
     mongodb:
-      uri: mongodb://mongodb:27017/parkit
+      uri: ${SPRING_DATA_MONGODB_URI:mongodb://mongodb:27017/parkit}
 
   kafka:
-    bootstrap-servers: my-kafka:9092
+    bootstrap-servers: ${SPRING_KAFKA_BOOTSTRAP_SERVERS:localhost:9092}
     consumer:
       group-id: report-group
       auto-offset-reset: latest
@@ -28,3 +28,9 @@ springdoc:
     path: /swagger-ui.html
   api-docs:
     path: /v3/api-docs
+
+parkit:
+  kafka:
+    enabled: true
+    topics:
+      sensor: sensor-topic

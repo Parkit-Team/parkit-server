@@ -4,16 +4,23 @@ import com.parkit.report.driving.domain.DrivingSessionStatus
 import com.parkit.report.driving.persistence.document.DrivingSessionDocument
 import com.parkit.report.driving.persistence.repository.DrivingSessionMongoRepository
 
-import org.springframework.http.HttpStatus
+import org.springframework.data.mongodb.core.FindAndModifyOptions
+import org.springframework.data.mongodb.core.MongoTemplate
+import org.springframework.data.mongodb.core.query.Criteria
+import org.springframework.data.mongodb.core.query.Query
+import org.springframework.data.mongodb.core.query.Update
 import org.springframework.stereotype.Service
 import org.springframework.web.server.ResponseStatusException
 import java.time.Clock
 import java.time.Instant
 import java.util.UUID
+import org.springframework.data.domain.Sort
+import org.springframework.http.HttpStatus
 
 @Service
 class DrivingSessionService(
 	private val drivingSessionRepository: DrivingSessionMongoRepository,
+	private val mongoTemplate: MongoTemplate,
 	private val clock: Clock = Clock.systemUTC(),
 ) {
 	fun start(userId: String?): DrivingSessionDocument {
@@ -30,6 +37,8 @@ class DrivingSessionService(
 			startedAt = now,
 			stoppedAt = null,
 			frontendScore = null,
+			firstSensorPayloadJson = null,
+			firstSensorReceivedAt = null,
 		)
 		return drivingSessionRepository.save(session)
 	}
@@ -53,4 +62,29 @@ class DrivingSessionService(
 	fun get(sessionId: String): DrivingSessionDocument =
 		drivingSessionRepository.findById(sessionId)
 			.orElseThrow { ResponseStatusException(HttpStatus.NOT_FOUND, "Session not found") }
+
+	fun attachFirstSensorPayloadIfAbsent(messageJson: String): DrivingSessionDocument? {
+		val now = Instant.now(clock)
+		val query = Query()
+			.addCriteria(Criteria.where("status").`is`(DrivingSessionStatus.RUNNING))
+			.addCriteria(
+				Criteria().orOperator(
+					Criteria.where("firstSensorPayloadJson").exists(false),
+					Criteria.where("firstSensorPayloadJson").`is`(null),
+				),
+			)
+			.with(Sort.by(Sort.Direction.DESC, "startedAt"))
+			.limit(1)
+
+		val update = Update()
+			.set("firstSensorPayloadJson", messageJson)
+			.set("firstSensorReceivedAt", now)
+
+		return mongoTemplate.findAndModify(
+			query,
+			update,
+			FindAndModifyOptions.options().returnNew(true),
+			DrivingSessionDocument::class.java,
+		)
+	}
 }
