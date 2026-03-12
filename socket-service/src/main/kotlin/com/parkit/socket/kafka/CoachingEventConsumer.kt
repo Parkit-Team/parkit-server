@@ -5,11 +5,13 @@ import com.fasterxml.jackson.module.kotlin.readValue
 import com.parkit.socket.dto.CoachingSocketDto
 import org.slf4j.LoggerFactory
 import org.springframework.beans.factory.annotation.Value
+import org.springframework.boot.autoconfigure.condition.ConditionalOnProperty
 import org.springframework.kafka.annotation.KafkaListener
 import org.springframework.messaging.simp.SimpMessagingTemplate
 import org.springframework.stereotype.Component
 
 @Component
+@ConditionalOnProperty(prefix = "parkit.kafka", name = ["enabled"], havingValue = "true")
 class CoachingEventConsumer(
 	private val messagingTemplate: SimpMessagingTemplate,
 	private val objectMapper: ObjectMapper,
