@@ -8,11 +8,12 @@ import io.kotest.matchers.shouldBe
 class RiskDetectionServiceTest : BehaviorSpec({
 	val riskDetectionService = RiskDetectionService()
 
-    fun createMockEvent(dist: Double) = ParkingSensorDto(
-        time = 0.0, x = 0.0, y = 0.0, z = 0.0, steer = 0.0,
-        wheelDegree = 0.0, handleAngle = 0.0, speed = 1.0,
-        frontDist = dist, leftDist = dist, rightDist = dist, rearDist = dist
-    )
+	// step1 시작 좌표에 고정하여 이동거리(currentDistance)가 흔들리지 않게 테스트
+	fun createMockEvent(dist: Double) = ParkingSensorDto(
+		time = 0.0, x = -9.0, y = 1.015761, z = 0.0, steer = 0.0,
+		wheelDegree = 0.0, handleAngle = 0.0, speed = 1.0,
+		frontDist = dist, leftDist = dist, rightDist = dist, rearDist = dist,
+	)
 
 	Given("주차 센서 이벤트가 주어졌을 때") {
 		When("거리가 3.0m (안전 거리)인 경우") {
@@ -20,7 +21,9 @@ class RiskDetectionServiceTest : BehaviorSpec({
 			val result = riskDetectionService.calculate(step = 1, event = event)
 
 			Then("현재 거리/센서 거리가 DTO에 반영된다") {
-				result.currentDistance shouldBe 300
+				result.targetAngle shouldBe 0
+				result.targetDistance shouldBe 2643
+				result.currentDistance shouldBe 0
 				result.distances.frontDistance shouldBe 300
 				result.distances.backDistance shouldBe 300
 				result.distances.leftDistance shouldBe 300
@@ -37,11 +40,11 @@ class RiskDetectionServiceTest : BehaviorSpec({
 			val result = riskDetectionService.calculate(step = 1, event = event)
 
 			Then("currentDistance에 최소 거리가 들어간다") {
-				result.currentDistance shouldBe 80
+				result.currentDistance shouldBe 0
 			}
 
 			Then("calculate는 코칭 이벤트를 반환한다") {
-				riskDetectionService.calculate(step = 1, event = event).currentDistance shouldBe 80
+				riskDetectionService.calculate(step = 1, event = event).currentDistance shouldBe 0
 			}
 		}
 
@@ -50,7 +53,7 @@ class RiskDetectionServiceTest : BehaviorSpec({
 			val result = riskDetectionService.calculate(step = 1, event = event)
 
 			Then("currentDistance에 최소 거리가 들어간다") {
-				result.currentDistance shouldBe 20
+				result.currentDistance shouldBe 0
 			}
 		}
 	}

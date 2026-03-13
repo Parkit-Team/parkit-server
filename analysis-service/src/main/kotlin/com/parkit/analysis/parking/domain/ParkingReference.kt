@@ -1,5 +1,7 @@
 package com.parkit.analysis.parking.domain
 
+import kotlin.math.roundToInt
+
 /**
  * T자 주차 각 Step의 기준점(Reference) 및 허용 오차(Tolerance)를 정의합니다.
  */
@@ -27,12 +29,52 @@ object ParkingReference {
         targetYaw = null
     )
 
-    val STEP_4 = StepReference(
-        x = 13.407, y = -7.358, z = -0.07,
-        handleAngle = 0.0,
-        steeringRange = -540.0..540.0,
-        targetYaw = null
-    )
+	val STEP_4 = StepReference(
+		x = 13.407, y = -7.358, z = -0.07,
+		handleAngle = 0.0,
+		steeringRange = -540.0..540.0,
+		targetYaw = null
+	)
+
+	data class StepStart(
+		val x: Double,
+		val y: Double,
+	)
+
+	/**
+	 * 코칭용 기준값은 `data/step01.csv` ~ `data/step04.csv`를 기준으로 산출된 고정값입니다.
+	 * (각 step 파일의 첫 좌표를 step 시작점으로 보고, 다음 step 파일의 첫 좌표를 종료점으로 봄)
+	 */
+	fun coachingStepStart(step: Int): StepStart? = when (step) {
+		// step1 is straight (x-only) with fixed y
+		1 -> StepStart(x = -9.0, y = 1.015761)
+		2 -> StepStart(x = 12.991654, y = -0.775463)
+		3 -> StepStart(x = 18.481732, y = 1.884388)
+		4 -> StepStart(x = 13.403275, y = -6.415625)
+		else -> null
+	}
+
+	/**
+	 * 코칭(프론트 표시)용 목표 조향각(deg). step 내에서 고정.
+	 */
+	fun coachingTargetAngleDeg(step: Int): Int = when (step) {
+		1 -> 0
+		2 -> -536
+		3 -> 536
+		4 -> 0
+		else -> 0
+	}
+
+	/**
+	 * 코칭(프론트 표시)용 목표 이동거리(cm). step 내에서 고정.
+	 */
+	fun coachingTargetMoveDistanceCm(step: Int): Int = when (step) {
+		1 -> 2643
+		2 -> 610
+		3 -> 973
+		4 -> 174
+		else -> 0
+	}
 
     fun getReferenceForStep(step: Int): StepReference? = when (step) {
         1 -> STEP_1
