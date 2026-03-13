@@ -4,7 +4,12 @@
 ## Services
 - `analysis-service/` : Kafka 센서 이벤트 소비 → 주차 채점/코칭 계산 → Kafka 이벤트 발행
 - `socket-service/` : Kafka 코칭 이벤트 소비 → WebSocket(STOMP)으로 브로드캐스트
-- `report-service/` : 리포트/저장(별도 서비스)
+- `report-service/` : 주행 세션(start/stop) → 센서 로그 + 최종 점수 저장/조회 (MongoDB)
+
+report-service 주요 API
+- `POST /api/driving-sessions/start`
+- `POST /api/driving-sessions/{sessionId}/stop` (body: `frontendScore`)
+- `GET /api/driving-sessions/{sessionId}/report` (세션 + 센서로그)
 
 ## Data Flow (Local)
 1) `sensor-topic` (센서 이벤트) → analysis-service consume
@@ -13,6 +18,11 @@
    - 채점: `parking-score-result`
 3) socket-service가 `coaching-event` consume 후 `/topic/coaching` 브로드캐스트
 
+4) (선택) report-service가 `sensor-topic`을 consume하여 RUNNING 세션에 센서 로그를 자동 저장
+   - Kafka record key가 `sessionId`이면 해당 세션으로 저장
+   - key가 없으면 가장 최근 RUNNING 세션으로 저장
+   - 비활성화: `parkit.kafka.enabled=false`
+
 ## WebSocket
 - Real endpoint: `http://localhost:8082/ws/parkit`
 - Real topic: `/topic/coaching`
@@ -20,9 +30,15 @@
 - Mock topic: `/topic/coaching-mock`
 - 테스트 클라이언트: `socket-test.html`
 
+코칭 메시지 스키마(요약)
+- `targetAngle`/`targetDistance`: step별 고정값 (angle=deg, distance=cm)
+- `currentAngle`/`currentDistance`: 실시간값 (angle=deg, distance=cm)
+- `distances`: 장애물 거리(cm)
+
 ## Swagger
 - analysis-service: `http://localhost:8081/swagger-ui.html`
 - socket-service: `http://localhost:8082/swagger-ui.html`
+- report-service: `http://localhost:8083/swagger-ui.html`
 
 ## Run / Test
 이 레포는 루트 Gradle 빌드가 없습니다. 서비스 디렉토리에서 실행하세요.
@@ -37,12 +53,23 @@ bash ./gradlew bootRun
 cd ../socket-service
 bash ./gradlew clean test
 bash ./gradlew bootRun
+
+# report-service
+cd ../report-service
+bash ./gradlew clean test
+bash ./gradlew bootRun
 ```
 
-로컬 Kafka가 필요합니다(기본 `localhost:9092`).
+로컬 Kafka가 필요합니다(기본 `localhost:9092`, env: `SPRING_KAFKA_BOOTSTRAP_SERVERS`).
+
+report-service는 MongoDB가 필요합니다(env: `SPRING_MONGODB_URI`, 기본: `mongodb://mongodb:27017/parkit`).
+- 로컬에서 report-service를 호스트에서 직접 실행하면 `mongodb://localhost:27017/parkit`로 설정하세요.
+
+Known limitations
+- analysis-service는 현재 Kafka 메시지에 sessionId가 연결되지 않아(임시로 `unknown-session`) 멀티 세션 시나리오에서는 step/상태가 섞일 수 있습니다.
 
 ## Local Infra (Optional)
 ```bash
 docker compose up -d
 ```
-`docker-compose.yml`은 Postgres/Redis만 포함합니다.
+`docker-compose.yml`은 MongoDB/Redis(그리고 레거시 Postgres)를 포함합니다. Kafka는 별도로 준비해야 합니다.

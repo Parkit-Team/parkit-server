@@ -1,6 +1,15 @@
 version: '3.8'
 
 services:
+  mongodb:
+    image: mongo:7
+    container_name: parkit-mongodb
+    ports:
+      - "27017:27017"
+    volumes:
+      - mongodb_data:/data/db
+    restart: unless-stopped
+
   postgres:
     image: postgres:15
     container_name: parkit-postgres
@@ -24,5 +33,6 @@ services:
     restart: unless-stopped
 
 volumes:
+  mongodb_data:
   postgres_data:
   redis_data:

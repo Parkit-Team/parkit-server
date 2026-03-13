@@ -6,7 +6,7 @@ Each service is an independent Gradle project (there is no root Gradle build).
 Repo layout
 - `analysis-service/` (Spring WebFlux + Kafka + reactive Redis)
 - `socket-service/` (Spring WebFlux + WebSocket + Kafka)
-- `report-service/` (Spring MVC + JPA + Kafka + Postgres)
+- `report-service/` (Spring MVC + Kafka + MongoDB)
 
 Toolchain
 - Kotlin: 2.2.21
@@ -40,6 +40,9 @@ bash ./gradlew bootRun
 # run tests
 bash ./gradlew test
 
+# run a single test (same command works for all services)
+bash ./gradlew test --tests "com.parkit.<service>.SomeTest"
+
 # verification lifecycle (typically includes `test`)
 bash ./gradlew check
 ```
@@ -57,6 +60,9 @@ bash ./gradlew test --tests "com.parkit.analysis.AnalysisServiceApplicationTests
 
 # wildcard match
 bash ./gradlew test --tests "*ApplicationTests"
+
+# multiple patterns (repeat --tests)
+bash ./gradlew test --tests "*RiskDetectionServiceTest" --tests "*ParkingScoringServiceTest"
 ```
 
 Notes
@@ -67,6 +73,12 @@ Lint / Format
 - No dedicated lint/formatter tasks (ktlint/detekt/spotless) are configured in `build.gradle.kts` today.
 - Use `bash ./gradlew check` as the baseline verification step.
 - If you introduce formatting changes, keep them minimal and consistent with existing files (see style section).
+
+Local dependencies (typical)
+- `analysis-service`: Kafka + Redis
+- `socket-service`: Kafka
+- `report-service`: Kafka + MongoDB
+- Environment variables commonly used: `SPRING_KAFKA_BOOTSTRAP_SERVERS`, `SPRING_DATA_REDIS_HOST`, `SPRING_DATA_REDIS_PORT`, `SPRING_MONGODB_URI`
 
 ------------------------------------------------------------
 
@@ -81,6 +93,7 @@ Formatting
 - Follow existing formatting in the repo (current Kotlin sources use tabs for indentation).
 - Use trailing commas where it improves diffs (especially in multiline parameter/argument lists).
 - Keep line lengths reasonable; wrap long call chains.
+- Prefer explicit units in names when values are ambiguous (e.g., `*Cm`, `*Deg`, `*Ms`).
 
 Imports
 - Avoid wildcard imports.
@@ -104,10 +117,11 @@ Types and APIs
 - Prefer immutable DTOs (`data class`) with explicit types.
 - Prefer sealed hierarchies for domain outcomes when there are a few known variants.
 - Avoid leaking framework types across layers unless it simplifies the design.
+- Be careful with numeric conversions (Double -> Int rounding); document units at DTO boundaries.
 
 Spring conventions
 - Prefer constructor injection (no field injection).
-- Keep configuration in `src/main/resources/application.properties` (or introduce profiles deliberately).
+- Keep configuration in `src/main/resources/application.yml` / `application.properties` (or introduce profiles deliberately).
 - Separate concerns:
   - controllers/handlers: HTTP/WebSocket boundary, request/response mapping
   - services: business logic
@@ -115,7 +129,7 @@ Spring conventions
 
 Reactive vs blocking
 - `analysis-service` and `socket-service` use WebFlux; avoid blocking calls on event-loop threads.
-- `report-service` uses MVC + JPA; keep DB access within transactional boundaries.
+- `report-service` uses MVC (blocking). Keep DB/network calls inside request threads or dedicated executors.
 - If you must bridge blocking work in WebFlux, isolate it explicitly (e.g., bounded elastic scheduler) and document why.
 
 Error handling
@@ -124,6 +138,7 @@ Error handling
   - use `@ControllerAdvice`/`@RestControllerAdvice` for shared mapping and payloads
 - Don’t swallow exceptions; log with context and either recover explicitly or rethrow.
 - Validate inputs at the boundary (request DTO validation) and fail fast.
+- Kafka consumers: catch/ log with topic+key+offset when available; avoid poison-message infinite loops.
 
 Logging
 - Use structured, contextual logs (include identifiers like request id, entity id, topic/partition/offset).
@@ -134,7 +149,7 @@ Testing
 - Prefer faster slice tests when possible:
   - MVC: `@WebMvcTest`
   - WebFlux: `@WebFluxTest`
-  - JPA: `@DataJpaTest`
+  - Mongo: slice tests via repository tests or `@SpringBootTest` when needed
 - Use `@SpringBootTest` only when you need the full context.
 - Name tests clearly and keep assertions focused.
 
@@ -145,10 +160,12 @@ Service-specific quick refs
 `analysis-service/`
 - Dependencies: WebFlux, Kafka, reactive Redis, coroutines-reactor.
 - Test deps include: `spring-boot-starter-*-test` variants + coroutine test.
+- Produces coaching events (Kafka `coaching-event`) and score results.
 
 `socket-service/`
 - Dependencies: WebFlux, WebSocket, Kafka, coroutines-reactor.
+- Consumes coaching events and broadcasts over STOMP `/topic/coaching`.
 
 `report-service/`
-- Dependencies: WebMVC, JPA, Kafka; runtime Postgres.
-- Uses Kotlin `allOpen` for JPA annotations (entities are open at runtime).
+- Dependencies: WebMVC, Kafka, MongoDB.
+- Persists driving sessions + sensor logs in MongoDB.
