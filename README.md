@@ -72,4 +72,4 @@ Known limitations
 ```bash
 docker compose up -d
 ```
-`docker-compose.yml`은 MongoDB/Redis(그리고 레거시 Postgres)를 포함합니다. Kafka는 별도로 준비해야 합니다.
+`docker-compose.yml`은 MongoDB/Redis를 포함합니다. Kafka는 별도로 준비해야 합니다.
