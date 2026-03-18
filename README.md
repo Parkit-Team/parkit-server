@@ -1,6 +1,15 @@
 # Parkit
 실시간 주차 센서 데이터를 기반으로 채점/코칭을 계산하고, 클라이언트에 WebSocket(STOMP)으로 전달하는 멀티 서비스 레포입니다.
 
+## Contributor
+### [ri-naa](https://github.com/ri-naa)
+- Jenkins와 Docker를 활용하여 CI 자동화
+- 실시간 스트림 데이터 수집을 위한 Kafka Consumer 구현
+
+### [HI-JIN2](https://github.com/HI-JIN2) 
+- 주차 코칭 알고리즘 구현 
+- 마이크로 서비스 간 Kafka 통신으로 코칭 데이터 전달 및 Socket Server 구현
+
 ## Services
 - `analysis-service/` : Kafka 센서 이벤트 소비 → 주차 채점/코칭 계산 → Kafka 이벤트 발행
 - `socket-service/` : Kafka 코칭 이벤트 소비 → WebSocket(STOMP)으로 브로드캐스트
