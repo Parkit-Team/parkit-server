@@ -5,7 +5,6 @@ import com.parkit.analysis.coaching.dto.ObstacleDistancesDto
 import com.parkit.analysis.kafka.dto.ParkingSensorDto
 import com.parkit.analysis.parking.domain.ParkingReference
 import org.springframework.stereotype.Service
-import kotlin.math.min
 import kotlin.math.roundToInt
 
 @Service
@@ -29,16 +28,17 @@ class RiskDetectionService(
 	private fun createCoachingEvent(step: Int, event: ParkingSensorDto): CoachingSocketDto {
 		val targetAngleDeg = ParkingReference.coachingTargetAngleDeg(step)
 		val targetDistanceCm = ParkingReference.coachingTargetMoveDistanceCm(step)
+        val targetDistanceM = targetDistanceCm / 100
 		val stepStart = ParkingReference.coachingStepStart(step)
-		val currentMoveDistanceCmRaw = if (stepStart == null) {
+        val currentMoveDistanceMRaw = if (stepStart == null) {
 			0
 		} else if (step == 1) {
 			// step1 is straight: progress only on x-axis
-			((event.x - stepStart.x) * 100).roundToInt()
+            (event.x - stepStart.x).roundToInt()
 		} else {
-			(kotlin.math.hypot(event.x - stepStart.x, event.y - stepStart.y) * 100).roundToInt()
+            (kotlin.math.hypot(event.x - stepStart.x, event.y - stepStart.y)).roundToInt()
 		}
-		val currentMoveDistanceCm = currentMoveDistanceCmRaw
+        val currentMoveDistanceM = currentMoveDistanceMRaw
 			.coerceAtLeast(0)
 			.let { if (targetDistanceCm > 0) it.coerceAtMost(targetDistanceCm) else it }
 		val distancesCm = ObstacleDistancesDto(
@@ -60,10 +60,10 @@ class RiskDetectionService(
             step = step,
             timestamp = System.currentTimeMillis(),
 			targetAngle = targetAngleDeg,
-			targetDistance = targetDistanceCm,
+            targetDistance = targetDistanceM, // m
 			currentAngle = event.handleAngle.roundToInt(),
-			currentDistance = currentMoveDistanceCm,
-			distances = distancesCm,
+            currentDistance = currentMoveDistanceM, //m
+            distances = distancesCm, //cm
             coachingId = coachingId,
         )
 	}
