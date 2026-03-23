@@ -21,8 +21,8 @@ data class ObstacleDistancesDto(
 data class CoachingSocketDto(
 	@field:Schema(description = "코칭 단계")
 	val step: Int,
-	@field:Schema(description = "타임스탬프(ms)")
-	val timestamp: Long,
+	@field:Schema(description = "타임스탬프 (RFC3333/ISO-8601)")
+	val timestamp: String,
     @field:Schema(description = "목표 각도(deg)")
     val targetAngle: Int,
     @field:Schema(description = "목표 이동 거리(m)")
