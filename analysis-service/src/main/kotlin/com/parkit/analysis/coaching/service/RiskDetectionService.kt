@@ -14,8 +14,8 @@ class RiskDetectionService(
      * 주차 센서와 장애물 간의 거리
      */
     companion object {
-		private const val DANGER_LIMIT_FRONT_BACK = 200
-		private const val DANGER_LIMIT_SIDE = 80
+		private const val DANGER_LIMIT_FRONT_BACK = 2.0
+		private const val DANGER_LIMIT_SIDE = 0.8
     }
 
     /**
@@ -27,31 +27,31 @@ class RiskDetectionService(
 
 	private fun createCoachingEvent(step: Int, event: ParkingSensorDto): CoachingSocketDto {
 		val targetAngleDeg = ParkingReference.coachingTargetAngleDeg(step)
-		val targetDistanceCm = ParkingReference.coachingTargetMoveDistanceCm(step)
+		val targetDistanceM = ParkingReference.coachingTargetMoveDistanceM(step)
 		val stepStart = ParkingReference.coachingStepStart(step)
-		val currentMoveDistanceCmRaw = if (stepStart == null) {
-			0
+		val currentMoveDistanceM = if (stepStart == null) {
+			0.0
 		} else if (step == 1) {
 			// step1 is straight: progress only on x-axis
-			((event.x - stepStart.x) * 100).roundToInt()
+			(event.x - stepStart.x).coerceAtLeast(0.0)
 		} else {
-			(kotlin.math.hypot(event.x - stepStart.x, event.y - stepStart.y) * 100).roundToInt()
+			kotlin.math.hypot(event.x - stepStart.x, event.y - stepStart.y)
 		}
-		val currentMoveDistanceCm = currentMoveDistanceCmRaw
-			.coerceAtLeast(0)
-			.let { if (targetDistanceCm > 0) it.coerceAtMost(targetDistanceCm) else it }
-		val distancesCm = ObstacleDistancesDto(
-			frontDistance = (event.frontDist * 100).roundToInt(),
-			backDistance = (event.rearDist * 100).roundToInt(),
-			leftDistance = (event.leftDist * 100).roundToInt(),
-			rightDistance = (event.rightDist * 100).roundToInt(),
+
+		val finalDistanceM = if (targetDistanceM > 0) currentMoveDistanceM.coerceAtMost(targetDistanceM) else currentMoveDistanceM
+
+		val distancesM = ObstacleDistancesDto(
+			frontDistance = event.frontDist,
+			backDistance = event.rearDist,
+			leftDistance = event.leftDist,
+			rightDistance = event.rightDist,
 		)
 
 		val coachingId = when {
-			distancesCm.backDistance <= DANGER_LIMIT_FRONT_BACK -> 1
-			distancesCm.frontDistance <= DANGER_LIMIT_FRONT_BACK -> 2
-			distancesCm.leftDistance <= DANGER_LIMIT_SIDE -> 3
-			distancesCm.rightDistance <= DANGER_LIMIT_SIDE -> 4
+			distancesM.backDistance <= DANGER_LIMIT_FRONT_BACK -> 1
+			distancesM.frontDistance <= DANGER_LIMIT_FRONT_BACK -> 2
+			distancesM.leftDistance <= DANGER_LIMIT_SIDE -> 3
+			distancesM.rightDistance <= DANGER_LIMIT_SIDE -> 4
 			else -> 5
 		}
 
@@ -59,10 +59,10 @@ class RiskDetectionService(
             step = step,
             timestamp = System.currentTimeMillis(),
 			targetAngle = targetAngleDeg,
-			targetDistance = targetDistanceCm,
+			targetDistance = targetDistanceM,
 			currentAngle = event.handleAngle.roundToInt(),
-			currentDistance = currentMoveDistanceCm,
-			distances = distancesCm,
+			currentDistance = (finalDistanceM * 100).roundToInt() / 100.0, // format to 2 decimals if needed, or just finalDistanceM
+			distances = distancesM,
             coachingId = coachingId,
         )
 	}

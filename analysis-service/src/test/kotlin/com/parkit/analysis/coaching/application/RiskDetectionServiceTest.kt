@@ -22,12 +22,12 @@ class RiskDetectionServiceTest : BehaviorSpec({
 
 			Then("현재 거리/센서 거리가 DTO에 반영된다") {
 				result.targetAngle shouldBe 0
-				result.targetDistance shouldBe 2206
-				result.currentDistance shouldBe 0
-				result.distances.frontDistance shouldBe 300
-				result.distances.backDistance shouldBe 300
-				result.distances.leftDistance shouldBe 300
-				result.distances.rightDistance shouldBe 300
+				result.targetDistance shouldBe 22.06
+				result.currentDistance shouldBe 0.0
+				result.distances.frontDistance shouldBe 3.0
+				result.distances.backDistance shouldBe 3.0
+				result.distances.leftDistance shouldBe 3.0
+				result.distances.rightDistance shouldBe 3.0
 			}
 
 			Then("calculate는 양호 상태(5)를 반환한다") {
@@ -40,11 +40,11 @@ class RiskDetectionServiceTest : BehaviorSpec({
 			val result = riskDetectionService.calculate(step = 1, event = event)
 
 			Then("currentDistance에 최소 거리가 들어간다") {
-				result.currentDistance shouldBe 0
+				result.currentDistance shouldBe 0.0
 			}
 
 			Then("calculate는 코칭 이벤트를 반환한다") {
-				riskDetectionService.calculate(step = 1, event = event).currentDistance shouldBe 0
+				riskDetectionService.calculate(step = 1, event = event).currentDistance shouldBe 0.0
 			}
 		}
 
@@ -53,7 +53,7 @@ class RiskDetectionServiceTest : BehaviorSpec({
 			val result = riskDetectionService.calculate(step = 1, event = event)
 
 			Then("currentDistance에 최소 거리가 들어간다") {
-				result.currentDistance shouldBe 0
+				result.currentDistance shouldBe 0.0
 			}
 		}
 	}

@@ -4,20 +4,20 @@ package com.parkit.analysis.coaching.dto
  * socket service로 전달될 코칭 알림 이벤트
  */
 data class ObstacleDistancesDto(
-	val frontDistance: Int,
-	val backDistance: Int,
-	val leftDistance: Int,
-	val rightDistance: Int,
+	val frontDistance: Double,
+	val backDistance: Double,
+	val leftDistance: Double,
+	val rightDistance: Double,
 )
 
 data class CoachingSocketDto(
     val step: Int,
     val timestamp: Long,
-    // units: angle=deg, distance=cm
+    // units: angle=deg, distance=m
     val targetAngle: Int,
-    val targetDistance: Int,
+    val targetDistance: Double,
     val currentAngle: Int,
-    val currentDistance: Int,
+    val currentDistance: Double,
 	val distances: ObstacleDistancesDto,
     val coachingId: Int,
 )
