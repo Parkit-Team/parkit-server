@@ -7,28 +7,28 @@ object ParkingReference {
 
     // 각 Step 별 목표(기준) 상태
     val STEP_1 = StepReference(
-        x = 7.568, y = 0.661, z = -0.07,
+        x = 16.655, y = -1.435, z = -0.07,
         handleAngle = 0,
         steeringRange = -10.0..10.0,
-        targetYaw = null // Step 1은 진입 단계이므로 yaw의 변화량으로 판단
-    ) //360+180 = 540
+        targetYaw = null
+    )
 
     val STEP_2 = StepReference(
-        x = 15.103, y = -0.253, z = -0.07,
+        x = 24.19, y = -2.349, z = -0.07,
         handleAngle = -540,
-        steeringRange = -540.0..-530.0, // 왼쪽
+        steeringRange = -540.0..-530.0,
         targetYaw = null
     )
 
     val STEP_3 = StepReference(
-        x = 14.568, y = -4.070, z = -0.07,
-        handleAngle = 540, //todo 각도의 임계값
-        steeringRange = 530.0..540.0, // 오른쪽
+        x = 23.655, y = -6.166, z = -0.07,
+        handleAngle = 540,
+        steeringRange = 530.0..540.0,
         targetYaw = null
     )
 
 	val STEP_4 = StepReference(
-		x = 13.407, y = -7.358, z = -0.07,
+		x = 22.494, y = -9.454, z = -0.07,
         handleAngle = 0,
         steeringRange = -10.0..10.0,
 		targetYaw = null
@@ -44,7 +44,7 @@ object ParkingReference {
 	 * (각 step 파일의 첫 좌표를 step 시작점으로 보고, 다음 step 파일의 첫 좌표를 종료점으로 봄)
 	 */
 	fun coachingStepStart(step: Int): StepStart? = when (step) {
-		1 -> StepStart(x = -14.492, y = 0.661)
+		1 -> StepStart(x = -5.405, y = -1.435)
 		2 -> StepStart(x = STEP_1.x, y = STEP_1.y)
 		3 -> StepStart(x = STEP_2.x, y = STEP_2.y)
 		4 -> StepStart(x = STEP_3.x, y = STEP_3.y)
