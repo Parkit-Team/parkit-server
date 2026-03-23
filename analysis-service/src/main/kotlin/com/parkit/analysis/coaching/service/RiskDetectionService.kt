@@ -38,7 +38,7 @@ class RiskDetectionService(
 			kotlin.math.hypot(event.x - stepStart.x, event.y - stepStart.y)
 		}
 
-		val finalDistanceM = if (targetDistanceM > 0) currentMoveDistanceM.coerceAtMost(targetDistanceM) else currentMoveDistanceM
+		val finalDistanceM = currentMoveDistanceM
 
 		val distancesCm = ObstacleDistancesDto(
 			frontDistance = (event.frontDist * 100).roundToInt(),
