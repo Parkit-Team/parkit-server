@@ -59,9 +59,9 @@ class RiskDetectionService(
             step = step,
             timestamp = java.time.LocalDateTime.now().toString(),
 			targetAngle = targetAngleDeg,
-			targetDistance = (targetDistanceM * 10).roundToInt() / 10.0,
+			targetDistance = (targetDistanceM * 100).roundToInt() / 100.0,
 			currentAngle = event.handleAngle.roundToInt(),
-			currentDistance = (finalDistanceM * 10).roundToInt() / 10.0,
+			currentDistance = (finalDistanceM * 100).roundToInt() / 100.0,
 			distances = distancesCm,
             coachingId = coachingId,
         )

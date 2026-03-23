@@ -53,7 +53,7 @@ class ParkingScoringService(
                 // 4. Step 종료 판별 로직
                 val ref = ParkingReference.getReferenceForStep(state.currentStep)
                 val isStepEnd = when (state.currentStep) {
-                    1 -> ref != null && event.x >= ref.x
+                    1 -> ref != null && event.x >= ref.x - 0.1
                     2, 3 -> state.maxAbsHandleAngleInStep >= 540.0 && Math.abs(event.handleAngle) < 1.0
                     else -> false
                 }
