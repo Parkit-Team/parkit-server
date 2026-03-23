@@ -4,6 +4,7 @@ import com.parkit.analysis.coaching.service.RiskDetectionService
 import com.parkit.analysis.kafka.dto.ParkingSensorDto
 import io.kotest.core.spec.style.BehaviorSpec
 import io.kotest.matchers.shouldBe
+import io.kotest.matchers.string.shouldNotBeBlank
 
 class RiskDetectionServiceTest : BehaviorSpec({
 	val riskDetectionService = RiskDetectionService()
@@ -31,7 +32,9 @@ class RiskDetectionServiceTest : BehaviorSpec({
 			}
 
 			Then("calculate는 양호 상태(5)를 반환한다") {
-				riskDetectionService.calculate(step = 1, event = event).coachingId shouldBe 5
+				val result2 = riskDetectionService.calculate(step = 1, event = event)
+				result2.coachingId shouldBe 5
+				result2.timestamp.shouldNotBeBlank()
 			}
 		}
 

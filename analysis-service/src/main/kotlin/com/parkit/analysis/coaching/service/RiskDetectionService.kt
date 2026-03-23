@@ -57,7 +57,7 @@ class RiskDetectionService(
 
 		return CoachingSocketDto(
             step = step,
-            timestamp = System.currentTimeMillis(),
+            timestamp = java.time.LocalDateTime.now().toString(),
 			targetAngle = targetAngleDeg,
 			targetDistance = targetDistanceM,
 			currentAngle = event.handleAngle.roundToInt(),
