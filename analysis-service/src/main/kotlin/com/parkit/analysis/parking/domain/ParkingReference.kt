@@ -44,11 +44,10 @@ object ParkingReference {
 	 * (각 step 파일의 첫 좌표를 step 시작점으로 보고, 다음 step 파일의 첫 좌표를 종료점으로 봄)
 	 */
 	fun coachingStepStart(step: Int): StepStart? = when (step) {
-		// step1 is straight (x-only) with fixed y
-		1 -> StepStart(x = -9.0, y = 1.015761)
-		2 -> StepStart(x = 12.991654, y = -0.775463)
-		3 -> StepStart(x = 18.481732, y = 1.884388)
-		4 -> StepStart(x = 13.403275, y = -6.415625)
+		1 -> StepStart(x = -14.492, y = 0.661)
+		2 -> StepStart(x = STEP_1.x, y = STEP_1.y)
+		3 -> StepStart(x = STEP_2.x, y = STEP_2.y)
+		4 -> StepStart(x = STEP_3.x, y = STEP_3.y)
 		else -> null
 	}
 

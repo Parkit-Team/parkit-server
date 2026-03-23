@@ -35,7 +35,7 @@ class ParkingScoringService(
                 
                 // 새로운 세부사항: 차량이 다시 시작점(X < -13)으로 돌아오면 자동으로 스테이지 1로 초기화
                 if (event.x < -13.0 && (state.currentStep > 1 || state.isCompleted || state.collisionDetected)) {
-                    log.info("Restart detected (x < -13.0). Resetting session ${state.sessionId} to Step 1.")
+                    log.info("Restart detected (x = ${event.x}). Resetting session ${state.sessionId} to Step 1.")
                     state.currentStep = 1
                     state.isCompleted = false
                     state.collisionDetected = false
@@ -65,6 +65,7 @@ class ParkingScoringService(
                 }
 
                 if (isStepEnd) {
+                    log.info("Step ${state.currentStep} COMPLETED. Advancing to next step. (x=${event.x}, handle=${event.handleAngle}, maxHandle=${state.maxAbsHandleAngleInStep})")
                     // 5. Step 평가 및 점수 산정
                     val result = evaluateStep(state, event)
 
