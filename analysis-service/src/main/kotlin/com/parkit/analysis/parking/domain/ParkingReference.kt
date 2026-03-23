@@ -67,10 +67,10 @@ object ParkingReference {
 	 * 코칭(프론트 표시)용 목표 이동거리(m). step 내에서 고정.
 	 */
     fun coachingTargetMoveDistanceM(step: Int): Double = when (step) {
-        1 -> 22.06
-        2 -> 6.10
-        3 -> 9.73
-        4 -> 1.74
+        1 -> 22.1
+        2 -> 6.1
+        3 -> 9.7
+        4 -> 1.7
 		else -> 0.0
 	}
 

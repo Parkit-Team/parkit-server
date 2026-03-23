@@ -14,8 +14,8 @@ class RiskDetectionService(
      * 주차 센서와 장애물 간의 거리
      */
     companion object {
-		private const val DANGER_LIMIT_FRONT_BACK = 2.0
-		private const val DANGER_LIMIT_SIDE = 0.8
+		private const val DANGER_LIMIT_FRONT_BACK = 200
+		private const val DANGER_LIMIT_SIDE = 80
     }
 
     /**
@@ -40,18 +40,18 @@ class RiskDetectionService(
 
 		val finalDistanceM = if (targetDistanceM > 0) currentMoveDistanceM.coerceAtMost(targetDistanceM) else currentMoveDistanceM
 
-		val distancesM = ObstacleDistancesDto(
-			frontDistance = event.frontDist,
-			backDistance = event.rearDist,
-			leftDistance = event.leftDist,
-			rightDistance = event.rightDist,
+		val distancesCm = ObstacleDistancesDto(
+			frontDistance = (event.frontDist * 100).roundToInt(),
+			backDistance = (event.rearDist * 100).roundToInt(),
+			leftDistance = (event.leftDist * 100).roundToInt(),
+			rightDistance = (event.rightDist * 100).roundToInt(),
 		)
 
 		val coachingId = when {
-			distancesM.backDistance <= DANGER_LIMIT_FRONT_BACK -> 1
-			distancesM.frontDistance <= DANGER_LIMIT_FRONT_BACK -> 2
-			distancesM.leftDistance <= DANGER_LIMIT_SIDE -> 3
-			distancesM.rightDistance <= DANGER_LIMIT_SIDE -> 4
+			distancesCm.backDistance <= DANGER_LIMIT_FRONT_BACK -> 1
+			distancesCm.frontDistance <= DANGER_LIMIT_FRONT_BACK -> 2
+			distancesCm.leftDistance <= DANGER_LIMIT_SIDE -> 3
+			distancesCm.rightDistance <= DANGER_LIMIT_SIDE -> 4
 			else -> 5
 		}
 
@@ -59,10 +59,10 @@ class RiskDetectionService(
             step = step,
             timestamp = java.time.LocalDateTime.now().toString(),
 			targetAngle = targetAngleDeg,
-			targetDistance = targetDistanceM,
+			targetDistance = (targetDistanceM * 10).roundToInt() / 10.0,
 			currentAngle = event.handleAngle.roundToInt(),
-			currentDistance = (finalDistanceM * 100).roundToInt() / 100.0, // format to 2 decimals if needed, or just finalDistanceM
-			distances = distancesM,
+			currentDistance = (finalDistanceM * 10).roundToInt() / 10.0,
+			distances = distancesCm,
             coachingId = coachingId,
         )
 	}
