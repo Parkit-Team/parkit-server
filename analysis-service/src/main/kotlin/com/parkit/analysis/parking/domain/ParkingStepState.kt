@@ -21,7 +21,7 @@ data class ParkingStepState(
     // Yaw 계산을 위한 이전 상태 캐싱 (선택)
     var lastCoordinate: Coordinate? = null,
     
-    val startTime: Instant = Instant.now(),
+    var startTime: Instant = Instant.now(),
     var lastUpdateTime: Instant = Instant.now()
 ) {
     /**
