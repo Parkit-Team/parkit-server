@@ -9,28 +9,28 @@ object ParkingReference {
     val STEP_1 = StepReference(
         x = 7.568, y = 0.661, z = -0.07,
         handleAngle = 0,
-        steeringRange = 0.0..0.0,
+        steeringRange = -10.0..10.0,
         targetYaw = null // Step 1은 진입 단계이므로 yaw의 변화량으로 판단
     ) //360+180 = 540
 
     val STEP_2 = StepReference(
         x = 15.103, y = -0.253, z = -0.07,
         handleAngle = -540,
-        steeringRange = -540.0..0.0, // 왼쪽
+        steeringRange = -540.0..-530.0, // 왼쪽
         targetYaw = null
     )
 
     val STEP_3 = StepReference(
         x = 14.568, y = -4.070, z = -0.07,
         handleAngle = 540, //todo 각도의 임계값
-        steeringRange = 0.0..540.0, // 오른쪽
+        steeringRange = 530.0..540.0, // 오른쪽
         targetYaw = null
     )
 
 	val STEP_4 = StepReference(
 		x = 13.407, y = -7.358, z = -0.07,
         handleAngle = 0,
-        steeringRange = 0.0..0.0,
+        steeringRange = -10.0..10.0,
 		targetYaw = null
 	)
 
@@ -86,7 +86,7 @@ object ParkingReference {
     const val TOLERANCE_X = 1.0 // m
     const val TOLERANCE_Y = 1.0 // m
     const val TOLERANCE_Z = 0.5 // m
-    const val TOLERANCE_HANDLE = 50.0 // 도(degree)
+    const val TOLERANCE_HANDLE = 10.0 // 도(degree)
     const val TOLERANCE_YAW = 15.0 // 도(degree)
 
     // 충돌 판정 임계치 (Collision Threshold)
