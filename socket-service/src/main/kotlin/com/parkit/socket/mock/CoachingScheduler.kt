@@ -17,16 +17,16 @@ class CoachingScheduler(
 ) {
 	companion object {
 		private const val TOPIC_DESTINATION = "/topic/coaching-mock"
-		private const val DANGER_LIMIT_FRONT_BACK = 200
-		private const val DANGER_LIMIT_SIDE = 80
+		private const val DANGER_LIMIT_FRONT_BACK = 2.0
+		private const val DANGER_LIMIT_SIDE = 0.8
 	}
 
 	@Scheduled(fixedRate = 1000)
 	fun sendMockCoachingData() {
-		val frontGap = Random.nextInt(50, 301)
-		val backGap = Random.nextInt(50, 301)
-		val leftGap = Random.nextInt(30, 151)
-		val rightGap = Random.nextInt(30, 151)
+		val frontGap = Random.nextDouble(0.5, 3.0)
+		val backGap = Random.nextDouble(0.5, 3.0)
+		val leftGap = Random.nextDouble(0.3, 1.5)
+		val rightGap = Random.nextDouble(0.3, 1.5)
 
 		val coachingId = when {
 			backGap <= DANGER_LIMIT_FRONT_BACK -> 1
@@ -40,9 +40,9 @@ class CoachingScheduler(
 			step = 1,
 			timestamp = System.currentTimeMillis(),
             targetAngle = 0,
-            targetDistance = 100,
+            targetDistance = 1.0,
             currentAngle = 0,
-            currentDistance = Random.nextInt(0, 201),
+            currentDistance = Random.nextDouble(0.0, 2.0),
 			distances = ObstacleDistancesDto(
 				frontDistance = frontGap,
 				backDistance = backGap,

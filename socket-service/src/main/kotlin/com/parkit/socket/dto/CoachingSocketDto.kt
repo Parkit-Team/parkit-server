@@ -7,14 +7,14 @@ import io.swagger.v3.oas.annotations.media.Schema
  */
 @Schema(description = "장애물 거리 정보")
 data class ObstacleDistancesDto(
-	@field:Schema(description = "전방 거리")
-	val frontDistance: Int,
-	@field:Schema(description = "후방 거리")
-	val backDistance: Int,
-	@field:Schema(description = "좌측 거리")
-	val leftDistance: Int,
-	@field:Schema(description = "우측 거리")
-	val rightDistance: Int,
+	@field:Schema(description = "전방 거리(m)")
+	val frontDistance: Double,
+	@field:Schema(description = "후방 거리(m)")
+	val backDistance: Double,
+	@field:Schema(description = "좌측 거리(m)")
+	val leftDistance: Double,
+	@field:Schema(description = "우측 거리(m)")
+	val rightDistance: Double,
 )
 
 @Schema(description = "코칭 메시지")
@@ -25,12 +25,12 @@ data class CoachingSocketDto(
 	val timestamp: Long,
     @field:Schema(description = "목표 각도(deg)")
     val targetAngle: Int,
-    @field:Schema(description = "목표 이동 거리(cm)")
-    val targetDistance: Int,
+    @field:Schema(description = "목표 이동 거리(m)")
+    val targetDistance: Double,
     @field:Schema(description = "현재 각도(deg)")
     val currentAngle: Int,
-    @field:Schema(description = "현재 이동 거리(cm)")
-    val currentDistance: Int,
+    @field:Schema(description = "현재 이동 거리(m)")
+    val currentDistance: Double,
 	@field:Schema(description = "장애물 거리")
 	val distances: ObstacleDistancesDto,
 	@field:Schema(description = "코칭 ID")
