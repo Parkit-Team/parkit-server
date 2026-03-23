@@ -5,7 +5,6 @@ import com.parkit.analysis.coaching.dto.ObstacleDistancesDto
 import com.parkit.analysis.kafka.dto.ParkingSensorDto
 import com.parkit.analysis.parking.domain.ParkingReference
 import org.springframework.stereotype.Service
-import kotlin.math.min
 import kotlin.math.roundToInt
 
 @Service
@@ -28,7 +27,7 @@ class RiskDetectionService(
 
 	private fun createCoachingEvent(step: Int, event: ParkingSensorDto): CoachingSocketDto {
 		val targetAngleDeg = ParkingReference.coachingTargetAngleDeg(step)
-		val targetDistanceCm = ParkingReference.coachingTargetMoveDistanceCm(step)
+        val targetDistanceCm = ParkingReference.coachingTargetMoveDistanceCm(step)
 		val stepStart = ParkingReference.coachingStepStart(step)
 		val currentMoveDistanceCmRaw = if (stepStart == null) {
 			0

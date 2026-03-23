@@ -1,7 +1,5 @@
 package com.parkit.analysis.parking.domain
 
-import kotlin.math.roundToInt
-
 /**
  * T자 주차 각 Step의 기준점(Reference) 및 허용 오차(Tolerance)를 정의합니다.
  */
@@ -10,29 +8,29 @@ object ParkingReference {
     // 각 Step 별 목표(기준) 상태
     val STEP_1 = StepReference(
         x = 7.568, y = 0.661, z = -0.07,
-        handleAngle = 0.0,
-        steeringRange = -540.0..540.0,
+        handleAngle = 0,
+        steeringRange = -10.0..10.0,
         targetYaw = null // Step 1은 진입 단계이므로 yaw의 변화량으로 판단
-    )
+    ) //360+180 = 540
 
     val STEP_2 = StepReference(
         x = 15.103, y = -0.253, z = -0.07,
-        handleAngle = 0.0,
-        steeringRange = -540.0..540.0,
+        handleAngle = -540,
+        steeringRange = -540.0..-530.0, // 왼쪽
         targetYaw = null
     )
 
     val STEP_3 = StepReference(
         x = 14.568, y = -4.070, z = -0.07,
-        handleAngle = 0.0,
-        steeringRange = 0.0..540.0,
+        handleAngle = 540, //todo 각도의 임계값
+        steeringRange = 530.0..540.0, // 오른쪽
         targetYaw = null
     )
 
 	val STEP_4 = StepReference(
 		x = 13.407, y = -7.358, z = -0.07,
-		handleAngle = 0.0,
-		steeringRange = -540.0..540.0,
+        handleAngle = 0,
+        steeringRange = -10.0..10.0,
 		targetYaw = null
 	)
 
@@ -59,8 +57,8 @@ object ParkingReference {
 	 */
 	fun coachingTargetAngleDeg(step: Int): Int = when (step) {
 		1 -> 0
-		2 -> -536
-		3 -> 536
+		2 -> -540
+		3 -> 540
 		4 -> 0
 		else -> 0
 	}
@@ -68,11 +66,11 @@ object ParkingReference {
 	/**
 	 * 코칭(프론트 표시)용 목표 이동거리(cm). step 내에서 고정.
 	 */
-	fun coachingTargetMoveDistanceCm(step: Int): Int = when (step) {
-		1 -> 2643
-		2 -> 610
-		3 -> 973
-		4 -> 174
+    fun coachingTargetMoveDistanceCm(step: Int): Int = when (step) {
+        1 -> 2643
+        2 -> 610
+        3 -> 973
+        4 -> 174
 		else -> 0
 	}
 
@@ -88,7 +86,7 @@ object ParkingReference {
     const val TOLERANCE_X = 1.0 // m
     const val TOLERANCE_Y = 1.0 // m
     const val TOLERANCE_Z = 0.5 // m
-    const val TOLERANCE_HANDLE = 50.0 // 도(degree)
+    const val TOLERANCE_HANDLE = 10.0 // 도(degree)
     const val TOLERANCE_YAW = 15.0 // 도(degree)
 
     // 충돌 판정 임계치 (Collision Threshold)
@@ -99,7 +97,7 @@ data class StepReference(
     val x: Double,
     val y: Double,
     val z: Double,
-    val handleAngle: Double,
+    val handleAngle: Int,
     val steeringRange: ClosedFloatingPointRange<Double>,
     val targetYaw: Double?
 )
