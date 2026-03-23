@@ -21,21 +21,24 @@ class RiskDetectionService(
     /**
      * 주행 이벤트를 기반으로 코칭 이벤트를 계산합니다.
      */
-	fun calculate(step: Int, event: ParkingSensorDto): CoachingSocketDto {
-		return createCoachingEvent(step, event)
+	fun calculate(step: Int, event: ParkingSensorDto, initialX: Double? = null, initialY: Double? = null): CoachingSocketDto {
+		return createCoachingEvent(step, event, initialX, initialY)
     }
 
-	private fun createCoachingEvent(step: Int, event: ParkingSensorDto): CoachingSocketDto {
+	private fun createCoachingEvent(step: Int, event: ParkingSensorDto, initialX: Double?, initialY: Double?): CoachingSocketDto {
 		val targetAngleDeg = ParkingReference.coachingTargetAngleDeg(step)
 		val targetDistanceM = ParkingReference.coachingTargetMoveDistanceM(step)
-		val stepStart = ParkingReference.coachingStepStart(step)
-		val currentMoveDistanceM = if (stepStart == null) {
-			0.0
-		} else if (step == 1) {
-			// step1 is straight: progress only on x-axis
-			(event.x - stepStart.x).coerceAtLeast(0.0)
+		
+		val currentMoveDistanceM = if (step == 1 && initialX != null) {
+			// step1 is straight: progress relative to dynamic initialX
+			(event.x - initialX).coerceAtLeast(0.0)
 		} else {
-			kotlin.math.hypot(event.x - stepStart.x, event.y - stepStart.y)
+			val stepStart = ParkingReference.coachingStepStart(step)
+			if (stepStart == null) {
+				0.0
+			} else {
+				kotlin.math.hypot(event.x - stepStart.x, event.y - stepStart.y)
+			}
 		}
 
 		val finalDistanceM = currentMoveDistanceM

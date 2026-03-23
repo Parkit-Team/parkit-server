@@ -49,8 +49,17 @@ class ParkingScoringService(
                     state.trajectory.clear()
                     state.maxAbsHandleAngleInStep = 0.0
                     state.startTime = now
+                    state.initialX = null
+                    state.initialY = null
                 }
                 state.lastUpdateTime = now
+
+                // Step 1 진입 시 첫 좌표를 기준점으로 캡처
+                if (state.currentStep == 1 && state.initialX == null) {
+                    state.initialX = event.x
+                    state.initialY = event.y
+                    log.info("Captured initial position for session ${state.sessionId}: (${state.initialX}, ${state.initialY})")
+                }
 
                 // 2. 실시간 충돌 체크 (거리 센서 기반)
                 if (checkCollision(event)) {
@@ -65,9 +74,13 @@ class ParkingScoringService(
                 state.updateWith(currentCoord, event.handleAngle)
 
                 // 4. Step 종료 판별 로직
-                val ref = ParkingReference.getReferenceForStep(state.currentStep)
                 val isStepEnd = when (state.currentStep) {
-                    1 -> ref != null && event.x >= ref.x - 0.5
+                    1 -> {
+                        val initX = state.initialX ?: event.x
+                        val progressDist = (event.x - initX).coerceAtLeast(0.0)
+                        val targetDist = ParkingReference.coachingTargetMoveDistanceM(1)
+                        progressDist >= targetDist - 0.5
+                    }
                     2, 3 -> state.maxAbsHandleAngleInStep >= 500.0 && Math.abs(event.handleAngle) < 2.0
                     else -> false
                 }
@@ -143,6 +156,8 @@ class ParkingScoringService(
             errorYaw = errorYaw,
             trajectorySimilarityScore = trajectoryScore,
             scoreDeduction = deduction,
+            initialX = state.initialX,
+            initialY = state.initialY,
             message = msg.toString()
         )
     }
@@ -186,6 +201,8 @@ class ParkingScoringService(
         errorYaw = null,
         trajectorySimilarityScore = null,
         scoreDeduction = 100.0,
+        initialX = state.initialX,
+        initialY = state.initialY,
         message = message
     )
 
@@ -201,6 +218,8 @@ class ParkingScoringService(
         errorYaw = null,
         trajectorySimilarityScore = null,
         scoreDeduction = 0.0,
+        initialX = state.initialX,
+        initialY = state.initialY,
         message = message
     )
 
@@ -216,6 +235,8 @@ class ParkingScoringService(
         errorYaw = null,
         trajectorySimilarityScore = null,
         scoreDeduction = 0.0,
+        initialX = state.initialX,
+        initialY = state.initialY,
         message = message
     )
 }

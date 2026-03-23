@@ -14,6 +14,8 @@ data class ParkingStepState(
     var isCompleted: Boolean = false,
     var collisionDetected: Boolean = false,
     var totalScore: Double = 100.0,
+    var initialX: Double? = null,
+    var initialY: Double? = null,
     
     // (x, y) 좌표 시계열 배열 (Trajectory 평가용)
     val trajectory: MutableList<Coordinate> = mutableListOf(),
