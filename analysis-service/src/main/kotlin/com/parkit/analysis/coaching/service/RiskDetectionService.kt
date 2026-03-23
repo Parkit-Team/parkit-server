@@ -27,7 +27,7 @@ class RiskDetectionService(
 
 	private fun createCoachingEvent(step: Int, event: ParkingSensorDto, initialX: Double?, initialY: Double?): CoachingSocketDto {
 		val targetAngleDeg = ParkingReference.coachingTargetAngleDeg(step)
-		val targetDistanceM = ParkingReference.coachingTargetMoveDistanceM(step)
+		val targetDistanceM = ParkingReference.coachingTargetMoveDistanceM(step, initialX)
 		
 		val currentMoveDistanceM = if (step == 1 && initialX != null) {
 			// step1 is straight: progress relative to dynamic initialX

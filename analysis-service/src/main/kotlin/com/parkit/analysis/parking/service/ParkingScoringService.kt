@@ -75,12 +75,7 @@ class ParkingScoringService(
 
                 // 4. Step 종료 판별 로직
                 val isStepEnd = when (state.currentStep) {
-                    1 -> {
-                        val initX = state.initialX ?: event.x
-                        val progressDist = (event.x - initX).coerceAtLeast(0.0)
-                        val targetDist = ParkingReference.coachingTargetMoveDistanceM(1)
-                        progressDist >= targetDist - 0.5
-                    }
+                    1 -> event.x >= ParkingReference.STEP_1.x - 0.5
                     2, 3 -> state.maxAbsHandleAngleInStep >= 500.0 && Math.abs(event.handleAngle) < 2.0
                     else -> false
                 }

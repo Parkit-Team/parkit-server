@@ -7,28 +7,28 @@ object ParkingReference {
 
     // 각 Step 별 목표(기준) 상태
     val STEP_1 = StepReference(
-        x = 16.655, y = -1.435, z = -0.07,
+        x = 13.06, y = -1.435, z = -0.07,
         handleAngle = 0,
         steeringRange = -10.0..10.0,
         targetYaw = null
     )
 
     val STEP_2 = StepReference(
-        x = 24.19, y = -2.349, z = -0.07,
+        x = 20.595, y = -2.349, z = -0.07,
         handleAngle = -540,
         steeringRange = -540.0..-530.0,
         targetYaw = null
     )
 
     val STEP_3 = StepReference(
-        x = 23.655, y = -6.166, z = -0.07,
+        x = 20.06, y = -6.166, z = -0.07,
         handleAngle = 540,
         steeringRange = 530.0..540.0,
         targetYaw = null
     )
 
 	val STEP_4 = StepReference(
-		x = 22.494, y = -9.454, z = -0.07,
+		x = 18.899, y = -9.454, z = -0.07,
         handleAngle = 0,
         steeringRange = -10.0..10.0,
 		targetYaw = null
@@ -65,11 +65,11 @@ object ParkingReference {
 	/**
 	 * 코칭(프론트 표시)용 목표 이동거리(m). step 내에서 고정.
 	 */
-    fun coachingTargetMoveDistanceM(step: Int): Double = when (step) {
-        1 -> 22.06
-        2 -> 6.1
-        3 -> 9.7
-        4 -> 1.7
+    fun coachingTargetMoveDistanceM(step: Int, initialX: Double? = null): Double = when (step) {
+        1 -> (STEP_1.x - (initialX ?: -5.405)).coerceAtLeast(0.0)
+        2 -> kotlin.math.hypot(STEP_2.x - STEP_1.x, STEP_2.y - STEP_1.y)
+        3 -> kotlin.math.hypot(STEP_3.x - STEP_2.x, STEP_3.y - STEP_2.y)
+        4 -> kotlin.math.hypot(STEP_4.x - STEP_3.x, STEP_4.y - STEP_3.y)
 		else -> 0.0
 	}
 
