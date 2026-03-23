@@ -28,17 +28,16 @@ class RiskDetectionService(
 	private fun createCoachingEvent(step: Int, event: ParkingSensorDto): CoachingSocketDto {
 		val targetAngleDeg = ParkingReference.coachingTargetAngleDeg(step)
 		val targetDistanceCm = ParkingReference.coachingTargetMoveDistanceCm(step)
-        val targetDistanceM = targetDistanceCm / 100
 		val stepStart = ParkingReference.coachingStepStart(step)
-        val currentMoveDistanceMRaw = if (stepStart == null) {
+		val currentMoveDistanceCmRaw = if (stepStart == null) {
 			0
 		} else if (step == 1) {
 			// step1 is straight: progress only on x-axis
-            (event.x - stepStart.x).roundToInt()
+			(((event.x - stepStart.x) * 100).roundToInt() + 400)
 		} else {
-            (kotlin.math.hypot(event.x - stepStart.x, event.y - stepStart.y)).roundToInt()
+			(kotlin.math.hypot(event.x - stepStart.x, event.y - stepStart.y) * 100).roundToInt()
 		}
-        val currentMoveDistanceM = currentMoveDistanceMRaw
+		val currentMoveDistanceCm = currentMoveDistanceCmRaw
 			.coerceAtLeast(0)
 			.let { if (targetDistanceCm > 0) it.coerceAtMost(targetDistanceCm) else it }
 		val distancesCm = ObstacleDistancesDto(
@@ -60,10 +59,10 @@ class RiskDetectionService(
             step = step,
             timestamp = System.currentTimeMillis(),
 			targetAngle = targetAngleDeg,
-            targetDistance = targetDistanceM, // m
+			targetDistance = targetDistanceCm,
 			currentAngle = event.handleAngle.roundToInt(),
-            currentDistance = currentMoveDistanceM, //m
-            distances = distancesCm, //cm
+			currentDistance = currentMoveDistanceCm,
+			distances = distancesCm,
             coachingId = coachingId,
         )
 	}
