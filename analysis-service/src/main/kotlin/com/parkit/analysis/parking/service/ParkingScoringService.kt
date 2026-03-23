@@ -31,12 +31,18 @@ class ParkingScoringService(
                 }
             )
             .flatMap { state ->
-                // 1. 이미 실격 또는 종료된 세션이면 처리 무시
-                if (state.isCompleted || state.collisionDetected) {
-                    return@flatMap Mono.just(createIgnoredResult(state, "Session already completed or failed."))
-                }
-
                 val currentCoord = Coordinate(event.x, event.y)
+                
+                // 새로운 세부사항: 차량이 다시 시작점(X < -13)으로 돌아오면 자동으로 스테이지 1로 초기화
+                if (event.x < -13.0 && (state.currentStep > 1 || state.isCompleted || state.collisionDetected)) {
+                    log.info("Restart detected (x < -13.0). Resetting session ${state.sessionId} to Step 1.")
+                    state.currentStep = 1
+                    state.isCompleted = false
+                    state.collisionDetected = false
+                    state.totalScore = 100.0
+                    state.trajectory.clear()
+                    state.maxAbsHandleAngleInStep = 0.0
+                }
 
                 // 2. 실시간 충돌 체크 (거리 센서 기반)
                 if (checkCollision(event)) {
