@@ -57,8 +57,8 @@ object ParkingReference {
 	 */
 	fun coachingTargetAngleDeg(step: Int): Int = when (step) {
 		1 -> 0
-		2 -> -536
-		3 -> 536
+		2 -> -540
+		3 -> 540
 		4 -> 0
 		else -> 0
 	}
@@ -66,11 +66,11 @@ object ParkingReference {
 	/**
 	 * 코칭(프론트 표시)용 목표 이동거리(cm). step 내에서 고정.
 	 */
-    fun coachingTargetMoveDistanceM(step: Int): Int = when (step) {
-        1 -> 26
-        2 -> 6
-        3 -> 9
-        4 -> 1
+    fun coachingTargetMoveDistanceCm(step: Int): Int = when (step) {
+        1 -> 2643
+        2 -> 610
+        3 -> 973
+        4 -> 174
 		else -> 0
 	}
 
