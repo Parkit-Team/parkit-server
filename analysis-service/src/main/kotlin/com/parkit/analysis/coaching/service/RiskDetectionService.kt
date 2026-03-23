@@ -33,7 +33,7 @@ class RiskDetectionService(
 			0
 		} else if (step == 1) {
 			// step1 is straight: progress only on x-axis
-			(((event.x - stepStart.x) * 100).roundToInt() + 400)
+			((event.x - stepStart.x) * 100).roundToInt()
 		} else {
 			(kotlin.math.hypot(event.x - stepStart.x, event.y - stepStart.y) * 100).roundToInt()
 		}
