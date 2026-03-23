@@ -54,7 +54,7 @@ class ParkingScoringService(
                 val ref = ParkingReference.getReferenceForStep(state.currentStep)
                 val isStepEnd = when (state.currentStep) {
                     1 -> ref != null && event.x >= ref.x - 0.5
-                    2, 3 -> state.maxAbsHandleAngleInStep >= 540.0 && Math.abs(event.handleAngle) < 1.0
+                    2, 3 -> state.maxAbsHandleAngleInStep >= 500.0 && Math.abs(event.handleAngle) < 2.0
                     else -> false
                 }
 
