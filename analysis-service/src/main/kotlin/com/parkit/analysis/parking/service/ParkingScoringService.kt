@@ -51,8 +51,12 @@ class ParkingScoringService(
                 state.updateWith(currentCoord, event.handleAngle)
 
                 // 4. Step 종료 판별 로직
-                // 조건: |이전의 최고 조향각| >= 540 AND 현재 조향각 == 0
-                val isStepEnd = state.maxAbsHandleAngleInStep >= 540.0 && Math.abs(event.handleAngle) < 0.1
+                val ref = ParkingReference.getReferenceForStep(state.currentStep)
+                val isStepEnd = when (state.currentStep) {
+                    1 -> ref != null && event.x >= ref.x
+                    2, 3 -> state.maxAbsHandleAngleInStep >= 540.0 && Math.abs(event.handleAngle) < 1.0
+                    else -> false
+                }
 
                 if (isStepEnd) {
                     // 5. Step 평가 및 점수 산정
