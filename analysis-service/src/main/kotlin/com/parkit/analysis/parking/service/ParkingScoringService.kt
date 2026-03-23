@@ -32,17 +32,25 @@ class ParkingScoringService(
             )
             .flatMap { state ->
                 val currentCoord = Coordinate(event.x, event.y)
-                
-                // 새로운 세부사항: 차량이 다시 시작점(X < -13)으로 돌아오면 자동으로 스테이지 1로 초기화
-                if (event.x < -13.0 && (state.currentStep > 1 || state.isCompleted || state.collisionDetected)) {
-                    log.info("Restart detected (x = ${event.x}). Resetting session ${state.sessionId} to Step 1.")
+                val now = java.time.Instant.now()
+                val idleTimeMillis = now.toEpochMilli() - state.lastUpdateTime.toEpochMilli()
+
+                // 1. 타임아웃(30초) 또는 시작점 복귀 검출 시 초기화
+                val isTimeout = idleTimeMillis > 30000 // 30초 이상 활동 없으면 새 세션으로 간주
+                val isReturnToStart = event.x < -13.0
+
+                if (isTimeout || isReturnToStart) {
+                    val reason = if (isTimeout) "Inactivity timeout ($idleTimeMillis ms)" else "Return to start (x=${event.x})"
+                    log.info("Resetting session ${state.sessionId} to Step 1. Reason: $reason")
                     state.currentStep = 1
                     state.isCompleted = false
                     state.collisionDetected = false
                     state.totalScore = 100.0
                     state.trajectory.clear()
                     state.maxAbsHandleAngleInStep = 0.0
+                    state.startTime = now
                 }
+                state.lastUpdateTime = now
 
                 // 2. 실시간 충돌 체크 (거리 센서 기반)
                 if (checkCollision(event)) {
