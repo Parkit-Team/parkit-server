@@ -7,8 +7,10 @@
 - 실시간 스트림 데이터 수집을 위한 Kafka Consumer 구현
 
 ### [HI-JIN2](https://github.com/HI-JIN2) 
-- 주차 코칭 알고리즘 구현 
-- 마이크로 서비스 간 Kafka 통신으로 코칭 데이터 전달 및 Socket Server 구현
+- 실시간 주차 코칭 알고리즘 설계 및 구현
+- Kafka를 활용해 마이크로서비스 간의 데이터 파이프라인 구축
+- WebSocket 기반 실시간 코칭 데이터 스트리밍 구현
+
 
 ## Services
 - `analysis-service/` : Kafka 센서 이벤트 소비 → 주차 채점/코칭 계산 → Kafka 이벤트 발행
