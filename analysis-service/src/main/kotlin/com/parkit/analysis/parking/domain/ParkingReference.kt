@@ -41,11 +41,17 @@ object ParkingReference {
 	 */
 	fun coachingStepStart(step: Int): StepStart? = when (step) {
 		1 -> null // Step 1 start is dynamic (initialX, initialY)
-		2 -> StepStart(x = 13.2505, y = -1.4371)
-		3 -> StepStart(x = 17.8161, y = 0.3827)
-		4 -> StepStart(x = 13.4130, y = -6.3754)
+		2 -> StepStart(x = STEP_1.x, y = STEP_1.y)
+		3 -> StepStart(x = STEP_2.x, y = STEP_2.y)
+		4 -> StepStart(x = STEP_3.x, y = STEP_3.y)
 		else -> null
 	}
+
+	// 단계 판정 관련 상수 (Refactoring)
+	const val GOAL_REACHED_POSITION_TOLERANCE_M = 0.05
+	const val GOAL_REACHED_HANDLE_ANGLE_THRESHOLD_DEG = 500.0
+	const val STABLE_HANDLE_ANGLE_TOLERANCE_DEG = 10.0
+	const val STABLE_SPEED_THRESHOLD_MPS = 0.1
 
 	/**
 	 * 코칭(프론트 표시)용 목표 조향각(deg). step 내에서 고정.

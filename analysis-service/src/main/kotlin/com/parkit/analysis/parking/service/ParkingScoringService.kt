@@ -73,21 +73,24 @@ class ParkingScoringService(
 				// 4. Step 종료 판별 로직
 				// (CSV 데이터 기반 정교화: 목표 도달 + 1초(1000ms) 이상 정지 상태 확인)
 				val isGoalReached = when (state.currentStep) {
-					1 -> event.x >= ParkingReference.STEP_1.x - 0.05
-					2 -> state.maxAbsHandleAngleInStep >= 500.0 && Math.abs(event.handleAngle) < 10.0 && 
-						 kotlin.math.hypot(event.x - ParkingReference.STEP_2.x, event.y - ParkingReference.STEP_2.y) < 0.05
-					3 -> state.maxAbsHandleAngleInStep >= 500.0 && Math.abs(event.handleAngle) < 10.0 && 
-						 kotlin.math.hypot(event.x - ParkingReference.STEP_3.x, event.y - ParkingReference.STEP_3.y) < 0.05
+					1 -> event.x >= ParkingReference.STEP_1.x - ParkingReference.GOAL_REACHED_POSITION_TOLERANCE_M
+					2 -> state.maxAbsHandleAngleInStep >= ParkingReference.GOAL_REACHED_HANDLE_ANGLE_THRESHOLD_DEG && 
+						 Math.abs(event.handleAngle) < ParkingReference.STABLE_HANDLE_ANGLE_TOLERANCE_DEG && 
+						 kotlin.math.hypot(event.x - ParkingReference.STEP_2.x, event.y - ParkingReference.STEP_2.y) < ParkingReference.GOAL_REACHED_POSITION_TOLERANCE_M
+					3 -> state.maxAbsHandleAngleInStep >= ParkingReference.GOAL_REACHED_HANDLE_ANGLE_THRESHOLD_DEG && 
+						 Math.abs(event.handleAngle) < ParkingReference.STABLE_HANDLE_ANGLE_TOLERANCE_DEG && 
+						 kotlin.math.hypot(event.x - ParkingReference.STEP_3.x, event.y - ParkingReference.STEP_3.y) < ParkingReference.GOAL_REACHED_POSITION_TOLERANCE_M
 					else -> false
 				}
 
-				val isSpeedStable = Math.abs(event.sensor.speed) < 0.1
+				val isSpeedStable = Math.abs(event.sensor.speed) < ParkingReference.STABLE_SPEED_THRESHOLD_MPS
 				
+				val stabilityStartTime = state.stabilityStartSimTime
 				// 리스타트 판별 (이전 상태의 stabilityStartSimTime이 있을 때 시간이 역행하면 리스타트로 간주)
-				val isRestart = state.stabilityStartSimTime != null && event.time < state.stabilityStartSimTime!!
+				val isRestart = stabilityStartTime != null && event.time < stabilityStartTime
 
 				if (isGoalReached && isSpeedStable) {
-					if (state.stabilityStartSimTime == null) {
+					if (stabilityStartTime == null) {
 						state.stabilityStartSimTime = event.time
 						log.info("Step ${state.currentStep} goal reached and stable. Starting stability timer at sim time ${event.time}")
 					}
@@ -96,8 +99,9 @@ class ParkingScoringService(
 					state.stabilityStartSimTime = null
 				}
 
+				val currentStabilityStartTime = state.stabilityStartSimTime
 				val stabilityThreshold = if (state.currentStep == 1) 1.0 else 10.0
-				val isStepEnd = (state.stabilityStartSimTime != null && (event.time - state.stabilityStartSimTime!!) >= stabilityThreshold) || isRestart
+				val isStepEnd = (currentStabilityStartTime != null && (event.time - currentStabilityStartTime) >= stabilityThreshold) || isRestart
 
 				if (isStepEnd) {
 					log.info("Step ${state.currentStep} COMPLETED. Advancing to next step. (isRestart=$isRestart, x=${event.x})")
