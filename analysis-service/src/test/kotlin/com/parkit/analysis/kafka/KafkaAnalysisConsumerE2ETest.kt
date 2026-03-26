@@ -7,7 +7,6 @@ import org.apache.kafka.clients.consumer.ConsumerRecord
 import org.junit.jupiter.api.Assertions.assertEquals
 import org.junit.jupiter.api.Assertions.assertTrue
 import org.junit.jupiter.api.Test
-import org.slf4j.LoggerFactory
 import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.boot.test.context.SpringBootTest
 import org.springframework.kafka.annotation.KafkaListener
@@ -15,9 +14,11 @@ import org.springframework.kafka.core.KafkaTemplate
 import org.springframework.kafka.test.context.EmbeddedKafka
 import org.springframework.stereotype.Component
 import org.springframework.test.context.TestPropertySource
+import org.awaitility.kotlin.await
+import org.awaitility.kotlin.until
 import java.io.File
+import java.time.Duration
 import java.util.concurrent.CopyOnWriteArrayList
-import java.util.concurrent.CountDownLatch
 
 @SpringBootTest
 @EmbeddedKafka(partitions = 1, ports = [0], topics = ["sensor-topic", "coaching-event"])
@@ -60,13 +61,12 @@ class KafkaAnalysisConsumerE2ETest {
 				return@forEachIndexed
 			}
 
-			// 현재 스텝에 대한 수집 리스트 초기화/마크 전 대기 (이전 스텝 메시지 잔류 방지)
-			Thread.sleep(500)
+			// 현재까지 수집된 이벤트 수 확인
 			val currentReceivedCountBefore = testConsumer.receivedEvents.size
-
 			val lines = file.readLines()
-			for (i in 1 until lines.size) { // 0번째 인덱스는 헤더이모로 생략
-				val line = lines[i]
+			val recordsToSend = lines.drop(1).filter { it.isNotBlank() }
+
+			for (line in recordsToSend) {
 				if (line.isBlank()) continue
 
 				val event = parseCsvLine(line)
@@ -74,28 +74,24 @@ class KafkaAnalysisConsumerE2ETest {
 				// 센서 이벤트 전송
 				val jsonPayload = objectMapper.writeValueAsString(event)
 				kafkaTemplate.send("sensor-topic", sessionId, jsonPayload)
-				Thread.sleep(50) 
+				Thread.sleep(10) 
 			}
 
 			// then: 해당 파일의 모든 이벤트가 expectedStep으로 처리되었는지 검증
-			// (마지막 이벤트는 transition을 발생시킬 수 있으므로 약간의 여유를 줌)
-			Thread.sleep(1000) // 처리 대기
+			// Awaitility를 사용하여 모든 레코드가 처리될 때까지 대기
+			await.atMost(Duration.ofSeconds(10)).until {
+				testConsumer.receivedEvents.size >= currentReceivedCountBefore + recordsToSend.size
+			}
 
 			val eventsSinceStart = testConsumer.receivedEvents.toList()
 				.drop(currentReceivedCountBefore)
+				.take(recordsToSend.size)
 				.map { objectMapper.readValue(it, CoachingSocketDto::class.java) }
 
 			assertTrue(eventsSinceStart.isNotEmpty(), "Step $expectedStep 에 대한 코칭 이벤트가 수집되어야 합니다.")
 			
 			eventsSinceStart.forEach { dto ->
-				// 예외 상황: 전환 직후의 이벤트가 섞일 수 있으나, 기본적으로는 expectedStep이어야 함.
-				// 만약 전환 지점에서 step이 변했다면, 해당 데이터 시나리오의 의도에 맞는지 확인.
-				if (dto.step != expectedStep) {
-					println("DEBUG: Step mismatch for file step$expectedStep.csv -> Received DTO step: ${dto.step}")
-				}
-				// 주차 시나리오 파일의 내용은 해당 스텝의 동작을 담고 있으므로assertEquals로 강제.
-				// 단, 마지막 레코드에서 다음 스텝으로 넘어갔다면 그 다음 레코드는 다음 파일에 있어야 함.
-				assertEquals(expectedStep, dto.step, "CSV $filePath 의 데이터는 Step $expectedStep 이어야 합니다.")
+				assertEquals(expectedStep, dto.step, "CSV $filePath 의 데이터는 Step $expectedStep 이어야 합니다. (DTO: $dto)")
 			}
 			
 			println("--- Step $expectedStep 검증 완료 (${eventsSinceStart.size} events) ---")
@@ -127,14 +123,10 @@ class KafkaAnalysisConsumerE2ETest {
  */
 @Component
 class TestCoachingEventConsumer {
-	private val logger = LoggerFactory.getLogger(javaClass)
-	val latch = CountDownLatch(1)
 	val receivedEvents = CopyOnWriteArrayList<String>()
 
 	@KafkaListener(topics = ["coaching-event"], groupId = "test-group-coaching")
 	fun consumeCoachingEvent(record: ConsumerRecord<String, String>) {
 		receivedEvents.add(record.value())
-		latch.countDown()
 	}
-
 }
