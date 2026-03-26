@@ -7,28 +7,25 @@ object ParkingReference {
 
 	// 각 Step 별 목표(기준) 상태 (data/step*.csv 기반 정합성 확보)
 	val STEP_1 = StepReference(
-		x = 17.4339, y = 1.0157, z = -0.07,
+		x = 13.2505, y = -1.4371, z = -0.07,
 		handleAngle = 0,
 		steeringRange = -10.0..10.0,
 		targetYaw = null
 	)
-
 	val STEP_2 = StepReference(
-		x = 13.5145, y = -4.0146, z = -0.07,
+		x = 17.8161, y = 0.3827, z = -0.07,
 		handleAngle = -540,
 		steeringRange = -540.0..-530.0,
 		targetYaw = null
 	)
-
 	val STEP_3 = StepReference(
-		x = 13.4110, y = -8.1922, z = -0.07,
+		x = 13.4130, y = -6.3754, z = -0.07,
 		handleAngle = 540,
 		steeringRange = 530.0..540.0,
 		targetYaw = null
 	)
-
 	val STEP_4 = StepReference(
-		x = 13.4114, y = -8.1849, z = -0.07,
+		x = 13.4180, y = -8.3187, z = -0.07,
 		handleAngle = 0,
 		steeringRange = -10.0..10.0,
 		targetYaw = null
@@ -44,9 +41,9 @@ object ParkingReference {
 	 */
 	fun coachingStepStart(step: Int): StepStart? = when (step) {
 		1 -> null // Step 1 start is dynamic (initialX, initialY)
-		2 -> StepStart(x = 17.4339, y = 1.0157)
-		3 -> StepStart(x = 13.5145, y = -4.0146)
-		4 -> StepStart(x = 13.4110, y = -8.1922)
+		2 -> StepStart(x = 13.2505, y = -1.4371)
+		3 -> StepStart(x = 17.8161, y = 0.3827)
+		4 -> StepStart(x = 13.4130, y = -6.3754)
 		else -> null
 	}
 
@@ -65,7 +62,7 @@ object ParkingReference {
 	 * 코칭(프론트 표시)용 목표 이동거리(m). step 내에서 고정.
 	 */
 	fun coachingTargetMoveDistanceM(step: Int, initialX: Double? = null): Double = when (step) {
-		1 -> if (initialX != null) (STEP_1.x - initialX).coerceAtLeast(0.0) else 22.8 /* Calculated from default start */
+		1 -> if (initialX != null) (STEP_1.x - initialX).coerceAtLeast(0.0) else 10.0 /* Default fallback */
 		2 -> kotlin.math.hypot(STEP_2.x - STEP_1.x, STEP_2.y - STEP_1.y)
 		3 -> kotlin.math.hypot(STEP_3.x - STEP_2.x, STEP_3.y - STEP_2.y)
 		4 -> kotlin.math.hypot(STEP_4.x - STEP_3.x, STEP_4.y - STEP_3.y)
