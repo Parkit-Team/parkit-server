@@ -58,7 +58,6 @@ class ParkingScoringServiceTest {
                 assertTrue(result.isCollision)
                 assertTrue(result.isCompleted) // 충돌 시 종료
                 assertEquals(1, result.step)
-                assertEquals(100.0, result.scoreDeduction) // 실격 감점
             }
             .verifyComplete()
     }
@@ -99,10 +98,10 @@ class ParkingScoringServiceTest {
         every { stateRepository.findById(sessionId) } returns Mono.just(state)
         every { stateRepository.save(any()) } returns Mono.just(true)
 
-        // Step 1의 종료 목표: (7.568, 0.661) - 1.0초 정지 필요 (Simulation time 사용)
+        // Step 1의 종료 목표: (13.2505, -1.4371) - 0.5초 정지 필요 (Simulation time 사용)
         val eventFinishStart = ParkingEvent(
             time = 0.0,
-            x = 7.568, y = 0.661, z = -0.07,
+            x = 13.2505, y = -1.4371, z = -0.07,
             handleAngle = 0.0,
             sensor = createDefaultSensorData().copy(speed = 0.0) // 정지상태
         )
@@ -110,7 +109,7 @@ class ParkingScoringServiceTest {
 
 		val eventFinishEnd = ParkingEvent(
 			time = 0.6, // 0.5s 이상 경과 (0.6)
-			x = 7.568, y = 0.661, z = -0.07,
+			x = 13.2505, y = -1.4371, z = -0.07,
 			handleAngle = 0.0,
 			sensor = createDefaultSensorData().copy(speed = 0.0) // 정지상태
 		)
@@ -121,9 +120,8 @@ class ParkingScoringServiceTest {
                 assertEquals(0.0, result.errorX!!, 0.001)
                 assertEquals(0.0, result.errorY!!, 0.001)
                 
-                // Step 2 상태로 내부 갱신되었는지 간접 확인 (현재 진행도 모델 상으로는, Event가 반영된 직후 Advance)
+                // Step 2 상태로 내부 갱신되었는지 간접 확인
                 assertEquals(1, result.step) // 결과 DTO는 해당 Step(1)에 대한 보고서
-                assertEquals(0.0, result.scoreDeduction) // 오차가 0이므로 감점 없음
             }
             .verifyComplete()
         

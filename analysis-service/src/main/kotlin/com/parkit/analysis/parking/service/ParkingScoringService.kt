@@ -148,9 +148,6 @@ class ParkingScoringService(
         // Trajectory의 맨 처음과 끝 점 간의 yaw를 구하거나, ref.targetYaw와 비교
         val errorYaw = computeYawError(state, ref.targetYaw)
 
-        // 3. Trajectory 유사도 계산 (여기서는 단순히 시작점~끝점 간 유클리드 거리 MSE 가정)
-        // 실제로는 DTW 또는 더 복잡한 알고리즘이 필요.
-        val trajectoryScore = computeTrajectoryMse(state, ref.x, ref.y)
 
         // 4. 오차 평가 (감점 로직 제거, 수치만 제공)
         val msg = StringBuilder("Step ${state.currentStep} Evaluated.")
@@ -170,8 +167,6 @@ class ParkingScoringService(
             errorZ = errorZ,
             errorHandle = errorHandle,
             errorYaw = errorYaw,
-            trajectorySimilarityScore = trajectoryScore,
-            scoreDeduction = 0.0,
             initialX = state.initialX,
             initialY = state.initialY,
             message = msg.toString()
@@ -196,14 +191,6 @@ class ParkingScoringService(
         return Math.abs(currentYaw - targetYaw)
     }
 
-    private fun computeTrajectoryMse(state: ParkingStepState, targetX: Double, targetY: Double): Double {
-        if (state.trajectory.isEmpty()) return 0.0
-        // 여기서는 가장 단순하게 마지막 좌표와 목표 좌표간의 유클리드 직선 거리를
-        // 궤적 점수로 변환 (추후 고도화 가능 지점)
-        val lastPoint = state.trajectory.last()
-        val dist = sqrt((lastPoint.x - targetX).pow(2) + (lastPoint.y - targetY).pow(2))
-        return dist
-    }
 
     private fun createDefeatingResult(state: ParkingStepState, message: String) = ScoringResultDto(
         sessionId = state.sessionId,
@@ -215,8 +202,6 @@ class ParkingScoringService(
         errorZ = null,
         errorHandle = null,
         errorYaw = null,
-        trajectorySimilarityScore = null,
-        scoreDeduction = 0.0,
         initialX = state.initialX,
         initialY = state.initialY,
         message = message
@@ -232,8 +217,6 @@ class ParkingScoringService(
         errorZ = null,
         errorHandle = null,
         errorYaw = null,
-        trajectorySimilarityScore = null,
-        scoreDeduction = 0.0,
         initialX = state.initialX,
         initialY = state.initialY,
         message = message
@@ -249,8 +232,6 @@ class ParkingScoringService(
         errorZ = null,
         errorHandle = null,
         errorYaw = null,
-        trajectorySimilarityScore = null,
-        scoreDeduction = 0.0,
         initialX = state.initialX,
         initialY = state.initialY,
         message = message

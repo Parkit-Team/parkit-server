@@ -66,7 +66,7 @@ class SimulatorTest {
             if (isStepUp || result.isCollision) {
                 println("--------------------------------------------------")
                 println("[EVENT] ${result.message}")
-                println("Step: ${result.step} | Deduction: ${result.scoreDeduction}")
+                println("Step: ${result.step}")
                 if (isStepUp) {
                     println("Errors -> X:${result.errorX}, Y:${result.errorY}, Z:${result.errorZ}, Handle:${result.errorHandle}, Yaw:${result.errorYaw}")
                 }
