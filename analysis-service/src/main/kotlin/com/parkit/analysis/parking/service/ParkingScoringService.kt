@@ -45,12 +45,12 @@ class ParkingScoringService(
                     state.currentStep = 1
                     state.isCompleted = false
                     state.collisionDetected = false
-                    state.totalScore = 100.0
                     state.trajectory.clear()
                     state.maxAbsHandleAngleInStep = 0.0
                     state.startTime = now
                     state.initialX = null
                     state.initialY = null
+                    state.stabilityStartSimTime = null
                 }
                 state.lastUpdateTime = now
 
@@ -64,7 +64,6 @@ class ParkingScoringService(
                 // 2. 실시간 충돌 체크 (거리 센서 기반)
                 if (checkCollision(event)) {
                     state.collisionDetected = true
-                    state.totalScore -= 100.0 // 실격
                     return@flatMap stateRepository.save(state).map {
                         createDefeatingResult(state, "Collision detected (distance < ${ParkingReference.COLLISION_DISTANCE_THRESHOLD}m)")
                     }
@@ -74,22 +73,48 @@ class ParkingScoringService(
                 state.updateWith(currentCoord, event.handleAngle)
 
                 // 4. Step 종료 판별 로직
-                val isStepEnd = when (state.currentStep) {
-                    1 -> event.x >= ParkingReference.STEP_1.x - 0.5
-                    2, 3 -> state.maxAbsHandleAngleInStep >= 500.0 && Math.abs(event.handleAngle) < 2.0
+                // (CSV 데이터 기반 정교화: 목표 도달 + 1초(1000ms) 이상 정지 상태 확인)
+                val isGoalReached = when (state.currentStep) {
+                    1 -> event.x >= ParkingReference.STEP_1.x - 0.002
+                    2 -> state.maxAbsHandleAngleInStep >= 500.0 && Math.abs(event.handleAngle) < 5.0 && 
+                         kotlin.math.hypot(event.x - ParkingReference.STEP_2.x, event.y - ParkingReference.STEP_2.y) < 0.002
+                    3 -> state.maxAbsHandleAngleInStep >= 500.0 && Math.abs(event.handleAngle) < 5.0 && 
+                         kotlin.math.hypot(event.x - ParkingReference.STEP_3.x, event.y - ParkingReference.STEP_3.y) < 0.002
                     else -> false
                 }
 
-                if (isStepEnd) {
-                    log.info("Step ${state.currentStep} COMPLETED. Advancing to next step. (x=${event.x}, handle=${event.handleAngle}, maxHandle=${state.maxAbsHandleAngleInStep})")
-                    // 5. Step 평가 및 점수 산정
-                    val result = evaluateStep(state, event)
+                val isSpeedStable = Math.abs(event.sensor.speed) < 0.1
 
-                    // 6. Step 진행
-                    state.advanceToNextStep()
-
-                    return@flatMap stateRepository.save(state).map { result }
+                if (isGoalReached && isSpeedStable) {
+                    if (state.stabilityStartSimTime == null) {
+                        state.stabilityStartSimTime = event.time
+                        log.info("Step ${state.currentStep} goal reached and stable. Starting stability timer at sim time ${event.time}")
+                    }
                 } else {
+                    state.stabilityStartSimTime = null
+                }
+
+                val stabilityThreshold = if (state.currentStep == 1) 1.0 else 10.0
+                val isRestart = state.stabilityStartSimTime != null && event.time < state.stabilityStartSimTime!!
+                val isStepEnd = (state.stabilityStartSimTime != null && (event.time - state.stabilityStartSimTime!!) >= stabilityThreshold) || isRestart
+
+                if (isStepEnd) {
+                    log.info("Step ${state.currentStep} COMPLETED. Advancing to next step. (isRestart=$isRestart, x=${event.x})")
+                    val result = evaluateStep(state, event) // 현재 스텝에 대한 최종 결과(완료)
+                    
+                    state.advanceToNextStep()
+                    state.stabilityStartSimTime = null // 다음 스텝을 위해 초기화
+
+                    return@flatMap stateRepository.save(state).map { 
+                        if (isRestart) {
+                            // 리스타트의 경우, 현재 레코드가 이미 다음 스텝의 시작이어야 하므로 다음 스텝 결과 반환
+                            evaluateStep(state, event)
+                        } else {
+                            result 
+                        }
+                    }
+                }
+ else {
                     // Step 진행 중
                     return@flatMap stateRepository.save(state).map {
                         createInProgressResult(state, "Step ${state.currentStep} in progress...")
@@ -127,17 +152,13 @@ class ParkingScoringService(
         // 실제로는 DTW 또는 더 복잡한 알고리즘이 필요.
         val trajectoryScore = computeTrajectoryMse(state, ref.x, ref.y)
 
-        // 4. 감점 결정 로직
-        var deduction = 0.0
+        // 4. 오차 평가 (감점 로직 제거, 수치만 제공)
         val msg = StringBuilder("Step ${state.currentStep} Evaluated.")
-        if (errorX > ParkingReference.TOLERANCE_X) { deduction += 5.0; msg.append(" [X Diff: $errorX]") }
-        if (errorY > ParkingReference.TOLERANCE_Y) { deduction += 5.0; msg.append(" [Y Diff: $errorY]") }
-        if (errorZ > ParkingReference.TOLERANCE_Z) { deduction += 2.0; msg.append(" [Z Diff: $errorZ]") }
-        if (errorHandle > ParkingReference.TOLERANCE_HANDLE) { deduction += 5.0; msg.append(" [Handle Diff: $errorHandle]") }
-
-        if (errorYaw != null && errorYaw > ParkingReference.TOLERANCE_YAW) { deduction += 5.0; msg.append(" [Yaw Diff: $errorYaw]") }
-
-        state.totalScore -= deduction
+        if (errorX > ParkingReference.TOLERANCE_X) { msg.append(" [X Diff: $errorX]") }
+        if (errorY > ParkingReference.TOLERANCE_Y) { msg.append(" [Y Diff: $errorY]") }
+        if (errorZ > ParkingReference.TOLERANCE_Z) { msg.append(" [Z Diff: $errorZ]") }
+        if (errorHandle > ParkingReference.TOLERANCE_HANDLE) { msg.append(" [Handle Diff: $errorHandle]") }
+        if (errorYaw != null && errorYaw > ParkingReference.TOLERANCE_YAW) { msg.append(" [Yaw Diff: $errorYaw]") }
 
         return ScoringResultDto(
             sessionId = state.sessionId,
@@ -150,7 +171,7 @@ class ParkingScoringService(
             errorHandle = errorHandle,
             errorYaw = errorYaw,
             trajectorySimilarityScore = trajectoryScore,
-            scoreDeduction = deduction,
+            scoreDeduction = 0.0,
             initialX = state.initialX,
             initialY = state.initialY,
             message = msg.toString()
@@ -195,7 +216,7 @@ class ParkingScoringService(
         errorHandle = null,
         errorYaw = null,
         trajectorySimilarityScore = null,
-        scoreDeduction = 100.0,
+        scoreDeduction = 0.0,
         initialX = state.initialX,
         initialY = state.initialY,
         message = message

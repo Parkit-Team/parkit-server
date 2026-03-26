@@ -62,7 +62,8 @@ class KafkaAnalysisConsumerE2ETest {
                 return@forEachIndexed
             }
 
-            // 현재 스텝에 대한 수집 리스트 초기화/마크
+            // 현재 스텝에 대한 수집 리스트 초기화/마크 전 대기 (이전 스텝 메시지 잔류 방지)
+            Thread.sleep(500)
             val currentReceivedCountBefore = testConsumer.receivedEvents.size
 
             val lines = file.readLines()

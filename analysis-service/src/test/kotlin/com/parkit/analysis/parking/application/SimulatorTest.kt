@@ -34,8 +34,8 @@ class SimulatorTest {
         val scoringService = ParkingScoringService(stateRepository)
 
         println("=== T-Parking Simulator Started ===")
-		val inputStream = SimulatorTest::class.java.getResourceAsStream("/data/step01.csv")
-			?: throw IllegalStateException("Missing test resource: /data/step01.csv")
+		val inputStream = javaClass.classLoader.getResourceAsStream("data/step01.csv")
+			?: throw IllegalStateException("Missing test resource: data/step01.csv")
 		val lines = inputStream.bufferedReader().use(BufferedReader::readLines).drop(1) // Header 제외
         
         for (line in lines) {
@@ -43,17 +43,18 @@ class SimulatorTest {
             if (tokens.size < 12) continue
             
             // CSV 헤더: time, x, y, z, steer, wheel_degree, handle_angle, speed, front_dist, left_dist, right_dist, rear_dist
-            val x = tokens[1].toDoubleOrNull() ?: continue
-            val y = tokens[2].toDoubleOrNull() ?: continue
-            val z = tokens[3].toDoubleOrNull() ?: continue
-            val handleAngle = tokens[6].toDoubleOrNull() ?: continue
-            val speed = tokens[7].toDoubleOrNull() ?: 0.0
-            val frontDist = tokens[8].toDoubleOrNull() ?: 5.0
-            val leftDist = tokens[9].toDoubleOrNull() ?: 5.0
-            val rightDist = tokens[10].toDoubleOrNull() ?: 5.0
-            val rearDist = tokens[11].toDoubleOrNull() ?: 5.0
+            val x = tokens[1].trim().toDoubleOrNull() ?: continue
+            val y = tokens[2].trim().toDoubleOrNull() ?: continue
+            val z = tokens[3].trim().toDoubleOrNull() ?: continue
+            val handleAngle = tokens[6].trim().toDoubleOrNull() ?: continue
+            val speed = tokens[7].trim().toDoubleOrNull() ?: 0.0
+            val frontDist = tokens[8].trim().toDoubleOrNull() ?: 5.0
+            val leftDist = tokens[9].trim().toDoubleOrNull() ?: 5.0
+            val rightDist = tokens[10].trim().toDoubleOrNull() ?: 5.0
+            val rearDist = tokens[11].trim().toDoubleOrNull() ?: 5.0
 
 			val event = ParkingEvent(
+				time = tokens[0].toDoubleOrNull() ?: 0.0,
 				x = x, y = y, z = z, handleAngle = handleAngle,
 				sensor = ParkingEvent.SensorData(frontDist, leftDist, rightDist, rearDist, speed)
 			)
@@ -65,7 +66,7 @@ class SimulatorTest {
             if (isStepUp || result.isCollision) {
                 println("--------------------------------------------------")
                 println("[EVENT] ${result.message}")
-                println("Step: ${result.step} | Deduction: ${result.scoreDeduction} | ScoreLeft: ${stateMap[sessionId]?.totalScore}")
+                println("Step: ${result.step} | Deduction: ${result.scoreDeduction}")
                 if (isStepUp) {
                     println("Errors -> X:${result.errorX}, Y:${result.errorY}, Z:${result.errorZ}, Handle:${result.errorHandle}, Yaw:${result.errorYaw}")
                 }

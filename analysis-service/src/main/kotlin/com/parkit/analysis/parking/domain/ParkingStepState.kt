@@ -13,7 +13,6 @@ data class ParkingStepState(
     var maxAbsHandleAngleInStep: Double = 0.0,
     var isCompleted: Boolean = false,
     var collisionDetected: Boolean = false,
-    var totalScore: Double = 100.0,
     var initialX: Double? = null,
     var initialY: Double? = null,
     
@@ -24,7 +23,8 @@ data class ParkingStepState(
     var lastCoordinate: Coordinate? = null,
     
     var startTime: Instant = Instant.now(),
-    var lastUpdateTime: Instant = Instant.now()
+    var lastUpdateTime: Instant = Instant.now(),
+    var stabilityStartSimTime: Double? = null
 ) {
     /**
      * 새로운 좌표 수신 시, Trajectory 기록 및 Max 조향각 갱신

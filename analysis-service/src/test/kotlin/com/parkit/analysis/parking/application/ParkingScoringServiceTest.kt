@@ -41,6 +41,7 @@ class ParkingScoringServiceTest {
         every { stateRepository.save(any()) } returns Mono.just(true)
 
 		val event = ParkingEvent(
+			time = 0.0,
 			x = 0.0, y = 0.0, z = 0.0,
 			handleAngle = 0.0,
 			sensor = ParkingEvent.SensorData(
@@ -72,6 +73,7 @@ class ParkingScoringServiceTest {
 
         // 강하게 돌림 (-536)
 		val eventTurn = ParkingEvent(
+			time = 0.0,
 			x = 0.405, y = 0.924, z = -0.08,
 			handleAngle = -536.29,
 			sensor = createDefaultSensorData()
@@ -97,14 +99,23 @@ class ParkingScoringServiceTest {
         every { stateRepository.findById(sessionId) } returns Mono.just(state)
         every { stateRepository.save(any()) } returns Mono.just(true)
 
-        // Step 1의 종료 목표: (7.568, 0.661)
-		val eventFinish = ParkingEvent(
+        // Step 1의 종료 목표: (7.568, 0.661) - 1.0초 정지 필요 (Simulation time 사용)
+        val eventFinishStart = ParkingEvent(
+            time = 0.0,
+            x = 7.568, y = 0.661, z = -0.07,
+            handleAngle = 0.0,
+            sensor = createDefaultSensorData().copy(speed = 0.0) // 정지상태
+        )
+        scoringService.processParkingEvent(sessionId, eventFinishStart).block()
+
+		val eventFinishEnd = ParkingEvent(
+			time = 0.6, // 0.5s 이상 경과 (0.6)
 			x = 7.568, y = 0.661, z = -0.07,
 			handleAngle = 0.0,
-			sensor = createDefaultSensorData()
+			sensor = createDefaultSensorData().copy(speed = 0.0) // 정지상태
 		)
 
-        StepVerifier.create(scoringService.processParkingEvent(sessionId, eventFinish))
+        StepVerifier.create(scoringService.processParkingEvent(sessionId, eventFinishEnd))
             .assertNext { result ->
                 assertNotNull(result.errorX, "평가 되었으므로 오차가 null이 아니어야 함")
                 assertEquals(0.0, result.errorX!!, 0.001)
