@@ -28,7 +28,6 @@ parkit:
     topics:
       sensor: sensor-topic
       coachingEvent: coaching-event
-      parkingScoreResult: parking-score-result
 
 logging:
   level:

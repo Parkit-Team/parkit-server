@@ -13,9 +13,9 @@
 
 
 ## Services
-- `analysis-service/` : Kafka 센서 이벤트 소비 → 주차 채점/코칭 계산 → Kafka 이벤트 발행
+- `analysis-service/` : Kafka 센서 이벤트 소비 → 주차 코칭 계산 → Kafka 이벤트 발행
 - `socket-service/` : Kafka 코칭 이벤트 소비 → WebSocket(STOMP)으로 브로드캐스트
-- `report-service/` : 주행 세션(start/stop) → 센서 로그 + 최종 점수 저장/조회 (MongoDB)
+- `report-service/` : 주행 세션(start/stop) → 센서 로그 저장/조회 (MongoDB)
 
 report-service 주요 API
 - `POST /api/driving-sessions/start`
@@ -26,7 +26,6 @@ report-service 주요 API
 1) `sensor-topic` (센서 이벤트) → analysis-service consume
 2) analysis-service 계산
    - 코칭: `coaching-event`
-   - 채점: `parking-score-result`
 3) socket-service가 `coaching-event` consume 후 `/topic/coaching` 브로드캐스트
 
 4) (선택) report-service가 `sensor-topic`을 consume하여 RUNNING 세션에 센서 로그를 자동 저장

@@ -22,8 +22,6 @@ class KafkaAnalysisConsumer(
     private val objectMapper: ObjectMapper,
     @Value("\${parkit.kafka.topics.coachingEvent}")
     private val coachingEventTopic: String,
-    @Value("\${parkit.kafka.topics.parkingScoreResult}")
-    private val parkingScoreResultTopic: String,
 ) {
     private val log = LoggerFactory.getLogger(KafkaAnalysisConsumer::class.java)
 
@@ -49,9 +47,6 @@ class KafkaAnalysisConsumer(
 							val coaching = riskDetectionService.calculate(result.step, event, result.initialX, result.initialY)
 							val coachingJson = objectMapper.writeValueAsString(coaching)
 							kafkaTemplate.send(coachingEventTopic, sessionId, coachingJson)
-
-                    val resultJson = objectMapper.writeValueAsString(result)
-                    kafkaTemplate.send(parkingScoreResultTopic, sessionId, resultJson)
                 }
                 .then()
                 .subscribe(
