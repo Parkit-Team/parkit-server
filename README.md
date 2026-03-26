@@ -2,11 +2,11 @@
 실시간 주차 센서 데이터를 기반으로 채점/코칭을 계산하고, 클라이언트에 WebSocket(STOMP)으로 전달하는 마이크로서비스 레포입니다.
 
 ## Contributor
-### [ri-naa](https://github.com/ri-naa)
+### [김리나](https://github.com/ri-naa)
 - Jenkins와 Docker를 활용하여 CI 자동화
 - 실시간 스트림 데이터 수집을 위한 Kafka Consumer 구현
 
-### [HI-JIN2](https://github.com/HI-JIN2) 
+### [유진](https://github.com/HI-JIN2) 
 - 실시간 주차 코칭 알고리즘 설계 및 구현
 - Kafka를 활용해 마이크로서비스 간의 데이터 파이프라인 구축
 - WebSocket 기반 실시간 코칭 데이터 스트리밍 구현
