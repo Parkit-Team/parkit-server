@@ -10,8 +10,6 @@ data class ScoringResultDto(
     val errorZ: Double?,
     val errorHandle: Double?,
     val errorYaw: Double?,
-    val trajectorySimilarityScore: Double?, // MSE 등 수치
-    val scoreDeduction: Double,
     val initialX: Double? = null,
     val initialY: Double? = null,
     val message: String

@@ -1,5 +1,5 @@
 # Parkit
-실시간 주차 센서 데이터를 기반으로 채점/코칭을 계산하고, 클라이언트에 WebSocket(STOMP)으로 전달하는 마이크로서비스 레포입니다.
+실시간 주차 센서 데이터를 기반으로 주차 코칭 데이터를 생성하고, 클라이언트에 WebSocket(STOMP)으로 전달하는 마이크로서비스 레포입니다.
 
 ## Contributor
 ### [김리나](https://github.com/ri-naa)
@@ -12,19 +12,18 @@
 - WebSocket 기반 실시간 코칭 데이터 스트리밍 구현
 
 ## Tech Stack
-![Kotlin](https://img.shields.io/badge/Kotlin-2-7F52FF?logo=kotlin&logoColor=white)
+![Kotlin](https://img.shields.io/badge/Kotlin-2.2.21-7F52FF?logo=kotlin&logoColor=white)
 ![Java](https://img.shields.io/badge/Java-17-007396?logo=java&logoColor=white)
-![Spring Boot](https://img.shields.io/badge/Spring%20Boot-4-6DB33F?logo=springboot&logoColor=white)
+![Spring Boot](https://img.shields.io/badge/Spring%20Boot-4.0.3-6DB33F?logo=springboot&logoColor=white)
 ![Spring Kafka](https://img.shields.io/badge/Spring-Kafka-6DB33F?logo=spring&logoColor=white)
 ![WebSocket](https://img.shields.io/badge/WebSocket-STOMP-010101?logo=websocket&logoColor=white)
 ![MongoDB](https://img.shields.io/badge/MongoDB-Database-47A248?logo=mongodb&logoColor=white)
 ![Redis](https://img.shields.io/badge/Redis-Cache-DC382D?logo=redis&logoColor=white)
 
-
 ## Services
-- `analysis-service/` : Kafka 센서 이벤트 소비 → 주차 채점/코칭 계산 → Kafka 이벤트 발행
+- `analysis-service/` : Kafka 센서 이벤트 소비 → 주차 코칭 계산 → Kafka 이벤트 발행
 - `socket-service/` : Kafka 코칭 이벤트 소비 → WebSocket(STOMP)으로 브로드캐스트
-- `report-service/` : 주행 세션(start/stop) → 센서 로그 + 최종 점수 저장/조회 (MongoDB)
+- `report-service/` : 주행 세션(start/stop) → 센서 로그 저장/조회 (MongoDB)
 
 report-service 주요 API
 - `POST /api/driving-sessions/start`
@@ -35,7 +34,6 @@ report-service 주요 API
 1) `sensor-topic` (센서 이벤트) → analysis-service consume
 2) analysis-service 계산
    - 코칭: `coaching-event`
-   - 채점: `parking-score-result`
 3) socket-service가 `coaching-event` consume 후 `/topic/coaching` 브로드캐스트
 
 4) (선택) report-service가 `sensor-topic`을 consume하여 RUNNING 세션에 센서 로그를 자동 저장

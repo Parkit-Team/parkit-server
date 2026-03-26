@@ -5,6 +5,7 @@ import com.parkit.analysis.parking.domain.ParkingEvent
 
 fun ParkingSensorDto.toParkingEvent(): ParkingEvent {
 	return ParkingEvent(
+		time = time,
 		x = x,
 		y = y,
 		z = z,

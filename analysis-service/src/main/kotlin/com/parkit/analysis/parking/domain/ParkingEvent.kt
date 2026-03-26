@@ -2,6 +2,7 @@ package com.parkit.analysis.parking.domain
 
 
 data class ParkingEvent(
+	val time: Double,
 	val x: Double,
 	val y: Double,
 	val z: Double,
