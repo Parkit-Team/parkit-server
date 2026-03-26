@@ -100,7 +100,7 @@ class ParkingScoringService(
 				}
 
 				val currentStabilityStartTime = state.stabilityStartSimTime
-				val stabilityThreshold = if (state.currentStep == 1) 1.0 else 10.0
+				val stabilityThreshold = if (state.currentStep == 1) 1.0 else 3.0
 				val isStepEnd = (currentStabilityStartTime != null && (event.time - currentStabilityStartTime) >= stabilityThreshold) || isRestart
 
 				if (isStepEnd) {

@@ -48,7 +48,7 @@ object ParkingReference {
 	}
 
 	// 단계 판정 관련 상수 (Refactoring)
-	const val GOAL_REACHED_POSITION_TOLERANCE_M = 0.05
+	const val GOAL_REACHED_POSITION_TOLERANCE_M = 0.20
 	const val GOAL_REACHED_HANDLE_ANGLE_THRESHOLD_DEG = 500.0
 	const val STABLE_HANDLE_ANGLE_TOLERANCE_DEG = 10.0
 	const val STABLE_SPEED_THRESHOLD_MPS = 0.1
