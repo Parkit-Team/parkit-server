@@ -62,7 +62,7 @@ object ParkingReference {
 	 * 코칭(프론트 표시)용 목표 이동거리(m). step 내에서 고정.
 	 */
 	fun coachingTargetMoveDistanceM(step: Int, initialX: Double? = null): Double = when (step) {
-		1 -> if (initialX != null) (STEP_1.x - initialX).coerceAtLeast(0.0) else 10.0 /* Default fallback */
+		1 -> if (initialX != null) (STEP_1.x - initialX).coerceAtLeast(0.0) else 18.6 /* Approx from -5.4 to 13.2 */
 		2 -> kotlin.math.hypot(STEP_2.x - STEP_1.x, STEP_2.y - STEP_1.y)
 		3 -> kotlin.math.hypot(STEP_3.x - STEP_2.x, STEP_3.y - STEP_2.y)
 		4 -> kotlin.math.hypot(STEP_4.x - STEP_3.x, STEP_4.y - STEP_3.y)
