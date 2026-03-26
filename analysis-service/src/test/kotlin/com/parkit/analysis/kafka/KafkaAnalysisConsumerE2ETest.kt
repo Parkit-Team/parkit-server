@@ -20,6 +20,7 @@ import java.time.Duration
 import java.util.concurrent.CopyOnWriteArrayList
 
 import org.junit.jupiter.api.condition.DisabledIfEnvironmentVariable
+import org.slf4j.LoggerFactory
 
 @SpringBootTest
 @EmbeddedKafka(partitions = 1, ports = [0], topics = ["sensor-topic", "coaching-event"])
@@ -31,6 +32,8 @@ import org.junit.jupiter.api.condition.DisabledIfEnvironmentVariable
 	"parkit.kafka.topics.coachingEvent=coaching-event"
 ])
 class KafkaAnalysisConsumerE2ETest {
+
+	private val log = LoggerFactory.getLogger(javaClass)
 
 	@Autowired
 	private lateinit var kafkaTemplate: KafkaTemplate<String, String>
@@ -56,11 +59,11 @@ class KafkaAnalysisConsumerE2ETest {
 		// when: CSV 파일을 순차적으로 읽어와 센서 데이터 전송
 		csvFiles.forEachIndexed { index, filePath ->
 			val expectedStep = index + 1
-			println("=== Step $expectedStep 시나리오 시작 ($filePath) ===")
+			log.info("=== Step {} 시나리오 시작 ({}) ===", expectedStep, filePath)
 			
 			val file = File(filePath)
 			if (!file.exists()) {
-				println("WARN: 파일이 존재하지 않습니다. 생략합니다. ($filePath)")
+				log.warn("파일이 존재하지 않습니다. 생략합니다. ({})", filePath)
 				return@forEachIndexed
 			}
 
@@ -97,7 +100,7 @@ class KafkaAnalysisConsumerE2ETest {
 				assertEquals(expectedStep, dto.step, "CSV $filePath 의 데이터는 Step $expectedStep 이어야 합니다. (DTO: $dto)")
 			}
 			
-			println("--- Step $expectedStep 검증 완료 (${eventsSinceStart.size} events) ---")
+			log.info("--- Step {} 검증 완료 ({} events) ---", expectedStep, eventsSinceStart.size)
 		}
 
 	}

@@ -14,6 +14,7 @@ import org.springframework.boot.test.context.TestConfiguration
 import org.springframework.context.annotation.Primary
 import org.springframework.kafka.core.KafkaTemplate
 import org.springframework.test.context.TestPropertySource
+import org.slf4j.LoggerFactory
 import io.mockk.every
 import io.mockk.mockk
 import io.mockk.verify
@@ -28,6 +29,8 @@ import java.util.concurrent.CompletableFuture
 	"parkit.kafka.topics.coachingEvent=coaching-event"
 ])
 class KafkaAnalysisConsumerMockTest {
+
+	private val log = LoggerFactory.getLogger(javaClass)
 
 	@Autowired
 	private lateinit var objectMapper: ObjectMapper
@@ -61,11 +64,11 @@ class KafkaAnalysisConsumerMockTest {
 
 		csvFiles.forEachIndexed { index, filePath ->
 			val expectedStep = index + 1
-			println("=== Step \$expectedStep Mock 시나리오 시작 (\$filePath) ===")
+			log.info("=== Step {} Mock 시나리오 시작 ({}) ===", expectedStep, filePath)
 			
 			val file = File(filePath)
 			if (!file.exists()) {
-				println("WARN: 파일이 존재하지 않습니다. 생략합니다. (\$filePath)")
+				log.warn("파일이 존재하지 않습니다. 생략합니다. ({})", filePath)
 				return@forEachIndexed
 			}
 
@@ -103,7 +106,7 @@ class KafkaAnalysisConsumerMockTest {
 				assertEquals(expectedStep, dto.step, "CSV \$filePath 의 데이터는 Step \$expectedStep 이어야 합니다. (DTO: \$dto)")
 			}
 			
-			println("--- Step \$expectedStep 검증 완료 (\${eventsSinceStart.size} events) ---")
+			log.info("--- Step {} 검증 완료 ({} events) ---", expectedStep, eventsSinceStart.size)
 		}
 	}
 
