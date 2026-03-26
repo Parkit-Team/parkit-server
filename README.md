@@ -1,4 +1,17 @@
 # Parkit
+실시간 주차 센서 데이터를 기반으로 주차 코칭 데이터를 생성하고, 클라이언트에 WebSocket(STOMP)으로 전달하는 마이크로서비스 레포입니다.
+
+## Contributor
+### [김리나](https://github.com/ri-naa)
+- Jenkins와 Docker를 활용하여 CI 자동화
+- 실시간 스트림 데이터 수집을 위한 Kafka Consumer 구현
+
+### [유진](https://github.com/HI-JIN2) 
+- 실시간 주차 코칭 알고리즘 설계 및 구현
+- Kafka를 활용해 마이크로서비스 간의 데이터 파이프라인 구축
+- WebSocket 기반 실시간 코칭 데이터 스트리밍 구현
+
+## Tech Stack
 ![Kotlin](https://img.shields.io/badge/Kotlin-2.2.21-7F52FF?logo=kotlin&logoColor=white)
 ![Java](https://img.shields.io/badge/Java-17-007396?logo=java&logoColor=white)
 ![Spring Boot](https://img.shields.io/badge/Spring%20Boot-4.0.3-6DB33F?logo=springboot&logoColor=white)
@@ -6,19 +19,6 @@
 ![WebSocket](https://img.shields.io/badge/WebSocket-STOMP-010101?logo=websocket&logoColor=white)
 ![MongoDB](https://img.shields.io/badge/MongoDB-Database-47A248?logo=mongodb&logoColor=white)
 ![Redis](https://img.shields.io/badge/Redis-Cache-DC382D?logo=redis&logoColor=white)
-
-실시간 주차 센서 데이터를 기반으로 채점/코칭을 계산하고, 클라이언트에 WebSocket(STOMP)으로 전달하는 멀티 서비스 레포입니다.
-
-## Contributor
-### [ri-naa](https://github.com/ri-naa)
-- Jenkins와 Docker를 활용하여 CI 자동화
-- 실시간 스트림 데이터 수집을 위한 Kafka Consumer 구현
-
-### [HI-JIN2](https://github.com/HI-JIN2) 
-- 실시간 주차 코칭 알고리즘 설계 및 구현
-- Kafka를 활용해 마이크로서비스 간의 데이터 파이프라인 구축
-- WebSocket 기반 실시간 코칭 데이터 스트리밍 구현
-
 
 ## Services
 - `analysis-service/` : Kafka 센서 이벤트 소비 → 주차 코칭 계산 → Kafka 이벤트 발행
