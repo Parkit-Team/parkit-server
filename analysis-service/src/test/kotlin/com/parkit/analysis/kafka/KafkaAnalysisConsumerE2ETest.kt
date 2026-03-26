@@ -3,6 +3,7 @@ package com.parkit.analysis.kafka
 import com.fasterxml.jackson.databind.ObjectMapper
 import com.parkit.analysis.coaching.dto.CoachingSocketDto
 import com.parkit.analysis.kafka.dto.ParkingSensorDto
+import com.parkit.analysis.util.TestCsvUtils
 import org.apache.kafka.clients.consumer.ConsumerRecord
 import org.junit.jupiter.api.Assertions.assertEquals
 import org.junit.jupiter.api.Assertions.assertTrue
@@ -75,7 +76,7 @@ class KafkaAnalysisConsumerE2ETest {
 			for (line in recordsToSend) {
 				if (line.isBlank()) continue
 
-				val event = parseCsvLine(line)
+				val event = TestCsvUtils.parseCsvLine(line)
 				
 				// 센서 이벤트 전송
 				val jsonPayload = objectMapper.writeValueAsString(event)
@@ -103,24 +104,6 @@ class KafkaAnalysisConsumerE2ETest {
 			log.info("--- Step {} 검증 완료 ({} events) ---", expectedStep, eventsSinceStart.size)
 		}
 
-	}
-
-	private fun parseCsvLine(line: String): ParkingSensorDto {
-		val tokens = line.split(",").map { it.trim() }
-		return ParkingSensorDto(
-			time = tokens[0].toDoubleOrNull() ?: 0.0,
-			x = tokens[1].toDoubleOrNull() ?: 0.0,
-			y = tokens[2].toDoubleOrNull() ?: 0.0,
-			z = tokens[3].toDoubleOrNull() ?: 0.0,
-			steer = tokens[4].toDoubleOrNull() ?: 0.0,
-			wheelDegree = tokens[5].toDoubleOrNull() ?: 0.0,
-			handleAngle = tokens[6].toDoubleOrNull() ?: 0.0,
-			speed = if (tokens[7] == "nan") 0.0 else tokens[7].toDoubleOrNull() ?: 0.0,
-			frontDist = tokens[8].toDoubleOrNull() ?: 0.0,
-			leftDist = tokens[9].toDoubleOrNull() ?: 0.0,
-			rightDist = tokens[10].toDoubleOrNull() ?: 0.0,
-			rearDist = tokens[11].toDoubleOrNull() ?: 0.0
-		)
 	}
 }
 
