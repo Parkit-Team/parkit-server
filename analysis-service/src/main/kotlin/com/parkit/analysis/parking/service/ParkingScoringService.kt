@@ -35,7 +35,7 @@ class ParkingScoringService(
 
 				// 1. 타임아웃(30초) 또는 시작점 복귀 검출 시 초기화
 				val isTimeout = idleTimeMillis > 30000 // 30초 이상 활동 없으면 새 세션으로 간주
-				val isReturnToStart = event.x < -4.0
+				val isReturnToStart = false // Dynamic start point; no fixed reset zone
 
 				if (isTimeout || isReturnToStart) {
 					val reason = if (isTimeout) "Inactivity timeout ($idleTimeMillis ms)" else "Return to start (x=${event.x})"

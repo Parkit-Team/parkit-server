@@ -43,7 +43,7 @@ object ParkingReference {
 	 * 코칭용 기준값은 `data/step01.csv` ~ `data/step04.csv`를 기준으로 산출된 고정값입니다.
 	 */
 	fun coachingStepStart(step: Int): StepStart? = when (step) {
-		1 -> StepStart(x = -5.415, y = -1.437)
+		1 -> null // Step 1 start is dynamic (initialX, initialY)
 		2 -> StepStart(x = 13.25, y = -1.437)
 		3 -> StepStart(x = 17.81, y = 0.38)
 		4 -> StepStart(x = 13.41, y = -6.37)
@@ -65,7 +65,7 @@ object ParkingReference {
 	 * 코칭(프론트 표시)용 목표 이동거리(m). step 내에서 고정.
 	 */
 	fun coachingTargetMoveDistanceM(step: Int, initialX: Double? = null): Double = when (step) {
-		1 -> (13.25 - (initialX ?: -5.415)).coerceAtLeast(0.0)
+		1 -> if (initialX != null) (STEP_1.x - initialX).coerceAtLeast(0.0) else 18.66 /* Default CSV-based distance as fallback */
 		2 -> kotlin.math.hypot(17.81 - 13.25, 0.38 - (-1.437))
 		3 -> kotlin.math.hypot(13.41 - 17.81, -6.37 - 0.38)
 		4 -> kotlin.math.hypot(13.41 - 13.41, -8.31 - (-6.37))

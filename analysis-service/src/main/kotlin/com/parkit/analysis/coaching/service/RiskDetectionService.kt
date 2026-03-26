@@ -29,16 +29,11 @@ class RiskDetectionService(
 		val targetAngleDeg = ParkingReference.coachingTargetAngleDeg(step)
 		val targetDistanceM = ParkingReference.coachingTargetMoveDistanceM(step, initialX)
 		
-		val currentMoveDistanceM = if (step == 1 && initialX != null) {
-			// step1 is straight: progress relative to dynamic initialX
-			(event.x - initialX).coerceAtLeast(0.0)
+		val currentMoveDistanceM = if (step == 1) {
+			if (initialX != null) (event.x - initialX).coerceAtLeast(0.0) else 0.0
 		} else {
 			val stepStart = ParkingReference.coachingStepStart(step)
-			if (stepStart == null) {
-				0.0
-			} else {
-				kotlin.math.hypot(event.x - stepStart.x, event.y - stepStart.y)
-			}
+			if (stepStart == null) 0.0 else kotlin.math.hypot(event.x - stepStart.x, event.y - stepStart.y)
 		}
 
 		val finalDistanceM = currentMoveDistanceM

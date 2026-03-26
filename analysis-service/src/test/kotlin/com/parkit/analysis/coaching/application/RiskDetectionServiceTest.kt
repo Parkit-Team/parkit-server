@@ -23,6 +23,7 @@ class RiskDetectionServiceTest : BehaviorSpec({
 
 			Then("현재 거리/센서 거리가 DTO에 반영된다") {
 				result.targetAngle shouldBe 0
+				// STEP_1.x (13.2505) - initialX (-9.0) = 22.2505 -> 22.3
 				result.targetDistance shouldBe 22.3
 				result.currentDistance shouldBe 0.0
 				result.distances.frontDistance shouldBe 300
