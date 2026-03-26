@@ -20,8 +20,12 @@ import java.io.File
 import java.time.Duration
 import java.util.concurrent.CopyOnWriteArrayList
 
+import org.junit.jupiter.api.condition.DisabledIfEnvironmentVariable
+
 @SpringBootTest
 @EmbeddedKafka(partitions = 1, ports = [0], topics = ["sensor-topic", "coaching-event"])
+// 젠킨스(CI) 또는 특정 환경(CI=true)일 때는 무거운 이 방식(EmbeddedKafka)을 건너뜁니다.
+@DisabledIfEnvironmentVariable(named = "JENKINS_URL", matches = ".*")
 @TestPropertySource(properties = [
 	"spring.kafka.bootstrap-servers=\${spring.embedded.kafka.brokers}",
 	"parkit.kafka.topics.sensor=sensor-topic",
