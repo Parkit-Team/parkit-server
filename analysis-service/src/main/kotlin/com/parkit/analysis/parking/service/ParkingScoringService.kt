@@ -73,27 +73,30 @@ class ParkingScoringService(
 				// 4. Step 종료 판별 로직
 				// (CSV 데이터 기반 정교화: 목표 도달 + 1초(1000ms) 이상 정지 상태 확인)
 				val isGoalReached = when (state.currentStep) {
-					1 -> event.x >= ParkingReference.STEP_1.x - 0.002
-					2 -> state.maxAbsHandleAngleInStep >= 500.0 && Math.abs(event.handleAngle) < 5.0 && 
-						 kotlin.math.hypot(event.x - ParkingReference.STEP_2.x, event.y - ParkingReference.STEP_2.y) < 0.002
-					3 -> state.maxAbsHandleAngleInStep >= 500.0 && Math.abs(event.handleAngle) < 5.0 && 
-						 kotlin.math.hypot(event.x - ParkingReference.STEP_3.x, event.y - ParkingReference.STEP_3.y) < 0.002
+					1 -> event.x >= ParkingReference.STEP_1.x - 0.05
+					2 -> state.maxAbsHandleAngleInStep >= 500.0 && Math.abs(event.handleAngle) < 10.0 && 
+						 kotlin.math.hypot(event.x - ParkingReference.STEP_2.x, event.y - ParkingReference.STEP_2.y) < 0.05
+					3 -> state.maxAbsHandleAngleInStep >= 500.0 && Math.abs(event.handleAngle) < 10.0 && 
+						 kotlin.math.hypot(event.x - ParkingReference.STEP_3.x, event.y - ParkingReference.STEP_3.y) < 0.05
 					else -> false
 				}
 
 				val isSpeedStable = Math.abs(event.sensor.speed) < 0.1
+				
+				// 리스타트 판별 (이전 상태의 stabilityStartSimTime이 있을 때 시간이 역행하면 리스타트로 간주)
+				val isRestart = state.stabilityStartSimTime != null && event.time < state.stabilityStartSimTime!!
 
 				if (isGoalReached && isSpeedStable) {
 					if (state.stabilityStartSimTime == null) {
 						state.stabilityStartSimTime = event.time
 						log.info("Step ${state.currentStep} goal reached and stable. Starting stability timer at sim time ${event.time}")
 					}
-				} else {
+				} else if (!isRestart) { 
+					// 리스타트 상황이 아닐 때만 목표 미달 시 타이머 초기화
 					state.stabilityStartSimTime = null
 				}
 
 				val stabilityThreshold = if (state.currentStep == 1) 1.0 else 10.0
-				val isRestart = state.stabilityStartSimTime != null && event.time < state.stabilityStartSimTime!!
 				val isStepEnd = (state.stabilityStartSimTime != null && (event.time - state.stabilityStartSimTime!!) >= stabilityThreshold) || isRestart
 
 				if (isStepEnd) {

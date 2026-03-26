@@ -42,10 +42,10 @@ class KafkaAnalysisConsumerE2ETest {
 	fun `주차 단계별 CSV 시나리오 전송 및 처리 검증`() {
 		// given: 각 스텝에 해당하는 CSV 파일 경로 목록
 		val csvFiles = listOf(
-			"../data/step1.csv",
-			"../data/step2.csv",
-			"../data/step3.csv",
-			"../data/step4.csv"
+			"src/test/resources/data/step01.csv",
+			"src/test/resources/data/step02.csv",
+			"src/test/resources/data/step03.csv",
+			"src/test/resources/data/step04.csv"
 		)
 		
 		val sessionId = "test-session-123"
