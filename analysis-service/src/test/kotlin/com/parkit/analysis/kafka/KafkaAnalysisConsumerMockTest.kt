@@ -49,10 +49,10 @@ class KafkaAnalysisConsumerMockTest {
 	@Test
 	fun `Mock 주차 단계별 CSV 시나리오 전송 및 서비스 로직 검증`() {
 		val csvFiles = listOf(
-			"../data/step1.csv",
-			"../data/step2.csv",
-			"../data/step3.csv",
-			"../data/step4.csv"
+			"src/test/resources/data/step01.csv",
+			"src/test/resources/data/step02.csv",
+			"src/test/resources/data/step03.csv",
+			"src/test/resources/data/step04.csv"
 		)
 		
 		val sessionId = "test-session-mock"
@@ -85,7 +85,7 @@ class KafkaAnalysisConsumerMockTest {
 				val event = parseCsvLine(line)
 				val jsonPayload = objectMapper.writeValueAsString(event)
 				
-				// 핵심! Kafka 브로커를 거치지 않고 타겟 메서드에 직접 데이터 주입
+				// Kafka 브로커를 거치지 않고 타겟 메서드에 직접 데이터 주입
 				val record = ConsumerRecord("sensor-topic", 0, 0L, sessionId, jsonPayload)
 				kafkaAnalysisConsumer.consume(record)
 			}
