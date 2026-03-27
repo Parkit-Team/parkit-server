@@ -108,7 +108,7 @@ class ParkingScoringServiceTest {
 		scoringService.processParkingEvent(sessionId, eventFinishStart).block()
 
 		val eventFinishEnd = ParkingEvent(
-			time = 0.6, // 0.5s 이상 경과 (0.6)
+			time = 1.1, // 1.0s 이상 경과 (1.1)
 			x = 13.2505, y = -1.4371, z = -0.07,
 			handleAngle = 0.0,
 			sensor = createDefaultSensorData().copy(speed = 0.0) // 정지상태
