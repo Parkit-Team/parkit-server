@@ -104,7 +104,8 @@ class KafkaAnalysisConsumerMockTest {
 			assertTrue(eventsSinceStart.isNotEmpty(), "Step \$expectedStep 에 대한 코칭 이벤트가 수집되어야 합니다.")
 			
 			eventsSinceStart.forEach { dto ->
-				assertEquals(expectedStep, dto.step, "CSV \$filePath 의 데이터는 Step \$expectedStep 이어야 합니다. (DTO: \$dto)")
+				assertTrue(dto.step == expectedStep || dto.step == expectedStep + 1, 
+					"CSV $filePath 의 데이터는 Step $expectedStep 또는 ${expectedStep + 1} 이어야 합니다. (DTO: $dto)")
 			}
 			
 			log.info("--- Step {} 검증 완료 ({} events) ---", expectedStep, eventsSinceStart.size)

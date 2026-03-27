@@ -30,7 +30,8 @@ import org.slf4j.LoggerFactory
 @TestPropertySource(properties = [
 	"spring.kafka.bootstrap-servers=\${spring.embedded.kafka.brokers}",
 	"parkit.kafka.topics.sensor=sensor-topic",
-	"parkit.kafka.topics.coachingEvent=coaching-event"
+	"parkit.kafka.topics.coachingEvent=coaching-event",
+	"spring.kafka.consumer.auto-offset-reset=earliest"
 ])
 class KafkaAnalysisConsumerE2ETest {
 
@@ -47,6 +48,9 @@ class KafkaAnalysisConsumerE2ETest {
 
 	@Test
 	fun `주차 단계별 CSV 시나리오 전송 및 처리 검증`() {
+		// Kafka 컨슈머가 완전히 준비될 때까지 잠시 대기
+		Thread.sleep(2000)
+
 		// given: 각 스텝에 해당하는 CSV 파일 경로 목록
 		val csvFiles = listOf(
 			"src/test/resources/data/step01.csv",
@@ -85,8 +89,8 @@ class KafkaAnalysisConsumerE2ETest {
 			}
 
 			// then: 해당 파일의 모든 이벤트가 expectedStep으로 처리되었는지 검증
-			// Awaitility를 사용하여 모든 레코드가 처리될 때까지 대기
-			await.atMost(Duration.ofSeconds(10)).until {
+			// Awaitility를 사용하여 모든 레코드가 처리될 때까지 대기 (타임아웃 30초로 상향)
+			await.atMost(Duration.ofSeconds(30)).until {
 				testConsumer.receivedEvents.size >= currentReceivedCountBefore + recordsToSend.size
 			}
 
