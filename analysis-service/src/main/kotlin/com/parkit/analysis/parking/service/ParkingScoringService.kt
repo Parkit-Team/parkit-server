@@ -34,7 +34,7 @@ class ParkingScoringService(
 				val idleTimeMillis = now.toEpochMilli() - state.lastUpdateTime.toEpochMilli()
 
 				// 1. 타임아웃(30초) 또는 시작점 복귀 검출 시 초기화
-				val isTimeout = idleTimeMillis > 30000 // 30초 이상 활동 없으면 새 세션으로 간주
+				val isTimeout = idleTimeMillis > ParkingReference.SESSION_INACTIVITY_TIMEOUT_MS // 30초 이상 활동 없으면 새 세션으로 간주
 				val isReturnToStart = false // Dynamic start point; no fixed reset zone
 
 				if (isTimeout || isReturnToStart) {
@@ -100,7 +100,11 @@ class ParkingScoringService(
 				}
 
 				val currentStabilityStartTime = state.stabilityStartSimTime
-				val stabilityThreshold = if (state.currentStep == 1) 1.0 else 10.0
+				val stabilityThreshold = if (state.currentStep == 1) {
+					ParkingReference.INITIAL_STABILITY_THRESHOLD_SEC
+				} else {
+					ParkingReference.SUBSEQUENT_STABILITY_THRESHOLD_SEC
+				}
 				val isStepEnd = (currentStabilityStartTime != null && (event.time - currentStabilityStartTime) >= stabilityThreshold) || isRestart
 
 				if (isStepEnd) {

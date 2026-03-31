@@ -48,10 +48,13 @@ object ParkingReference {
 	}
 
 	// 단계 판정 관련 상수 (Refactoring)
-	const val GOAL_REACHED_POSITION_TOLERANCE_M = 0.05
+	const val GOAL_REACHED_POSITION_TOLERANCE_M = 0.5
 	const val GOAL_REACHED_HANDLE_ANGLE_THRESHOLD_DEG = 500.0
 	const val STABLE_HANDLE_ANGLE_TOLERANCE_DEG = 10.0
 	const val STABLE_SPEED_THRESHOLD_MPS = 0.1
+	const val INITIAL_STABILITY_THRESHOLD_SEC = 1.0
+	const val SUBSEQUENT_STABILITY_THRESHOLD_SEC = 3.0
+	const val SESSION_INACTIVITY_TIMEOUT_MS = 30000L
 
 	/**
 	 * 코칭(프론트 표시)용 목표 조향각(deg). step 내에서 고정.
