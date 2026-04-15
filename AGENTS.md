@@ -69,6 +69,9 @@ Notes
 - If you run commands from the repo root, they will fail because there is no root build.
 - If a test selection does not match, Gradle will report "No tests found"; verify the fully-qualified name.
 
+GitHub PR
+- PR 본문(body)은 한글로 작성한다.
+
 Lint / Format
 - No dedicated lint/formatter tasks (ktlint/detekt/spotless) are configured in `build.gradle.kts` today.
 - Use `bash ./gradlew check` as the baseline verification step.

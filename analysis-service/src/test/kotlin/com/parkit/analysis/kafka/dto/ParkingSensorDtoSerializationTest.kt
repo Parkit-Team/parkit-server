@@ -28,17 +28,18 @@ class ParkingSensorDtoSerializationTest {
 
 		val dto = objectMapper.readValue(json, ParkingSensorDto::class.java)
 
-		assertEquals(28.19, dto.time)
-		assertEquals(-5.405197, dto.x)
-		assertEquals(-1.435728, dto.y)
-		assertEquals(-0.073432, dto.z)
-		assertEquals(0.0, dto.steer)
-		assertEquals(0.0, dto.wheelDegree)
-		assertEquals(0.0, dto.handleAngle)
-		assertEquals(-0.0, dto.speed)
-		assertEquals(6.841736959814851, dto.frontDist)
-		assertEquals(6.8549553028926455, dto.leftDist)
-		assertEquals(6.819816073111288, dto.rightDist)
-		assertEquals(6.269557738692705, dto.rearDist)
+		// Use deltas for floating-point stability across platforms/JSON parsers.
+		assertEquals(28.19, dto.time, 1e-12)
+		assertEquals(-5.405197, dto.x, 1e-12)
+		assertEquals(-1.435728, dto.y, 1e-12)
+		assertEquals(-0.073432, dto.z, 1e-12)
+		assertEquals(0.0, dto.steer, 1e-12)
+		assertEquals(0.0, dto.wheelDegree, 1e-12)
+		assertEquals(0.0, dto.handleAngle, 1e-12)
+		assertEquals(0.0, dto.speed, 1e-12)
+		assertEquals(6.841736959814851, dto.frontDist, 1e-12)
+		assertEquals(6.8549553028926455, dto.leftDist, 1e-12)
+		assertEquals(6.819816073111288, dto.rightDist, 1e-12)
+		assertEquals(6.269557738692705, dto.rearDist, 1e-12)
 	}
 }

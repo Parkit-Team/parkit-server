@@ -61,11 +61,4 @@ tasks.withType<Test> {
 	useJUnitPlatform()
 }
 
-tasks.jacocoTestReport {
-	dependsOn(tasks.test)
-	reports {
-		xml.required.set(true)
-		csv.required.set(true)
-		html.required.set(true)
-	}
-}
+apply(from = "../gradle/jacoco.gradle.kts")
