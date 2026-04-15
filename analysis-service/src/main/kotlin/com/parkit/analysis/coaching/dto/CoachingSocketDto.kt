@@ -20,4 +20,8 @@ data class CoachingSocketDto(
     val currentDistance: Double,
 	val distances: ObstacleDistancesDto,
     val coachingId: Int,
+
+	// Optional fields to correlate with sensor ingress (for k6 E2E latency measurement)
+	val eventId: String? = null,
+	val sensorSentAtEpochMs: Long? = null,
 )

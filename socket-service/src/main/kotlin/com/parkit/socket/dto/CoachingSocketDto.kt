@@ -35,4 +35,8 @@ data class CoachingSocketDto(
 	val distances: ObstacleDistancesDto,
 	@field:Schema(description = "코칭 ID")
 	val coachingId: Int,
+	@field:Schema(description = "센서 이벤트 ID(옵션, E2E 지연 측정용)")
+	val eventId: String? = null,
+	@field:Schema(description = "센서 발행 시각 epoch(ms)(옵션, E2E 지연 측정용)")
+	val sensorSentAtEpochMs: Long? = null,
 )

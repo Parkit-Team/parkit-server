@@ -17,5 +17,9 @@ data class ParkingSensorDto(
     @JsonProperty("front_dist") val frontDist: Double,
     @JsonProperty("left_dist") val leftDist: Double,
     @JsonProperty("right_dist") val rightDist: Double,
-    @JsonProperty("rear_dist") val rearDist: Double
+    @JsonProperty("rear_dist") val rearDist: Double,
+
+	// Load testing/observability metadata (optional)
+	@JsonProperty("event_id") val eventId: String? = null,
+	@JsonProperty("sent_at_epoch_ms") val sentAtEpochMs: Long? = null,
 )

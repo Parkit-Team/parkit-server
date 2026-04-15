@@ -62,6 +62,8 @@ class RiskDetectionService(
 			currentDistance = (finalDistanceM * 10).roundToInt() / 10.0,
 			distances = distancesCm,
             coachingId = coachingId,
+			eventId = event.eventId,
+			sensorSentAtEpochMs = event.sentAtEpochMs,
         )
 	}
 }

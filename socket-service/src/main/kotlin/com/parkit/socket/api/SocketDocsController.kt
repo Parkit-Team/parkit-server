@@ -19,6 +19,9 @@ class SocketDocsController {
 	@Value("\${parkit.mock.coaching.enabled:false}")
 	private val mockEnabled: Boolean = false
 
+	@Value("\${parkit.ws.raw.enabled:false}")
+	private val rawWsEnabled: Boolean = false
+
 	@GetMapping("/ws-info")
 	@Operation(
 		summary = "WebSocket(STOMP) 사용 안내",
@@ -26,6 +29,9 @@ class SocketDocsController {
 	)
 	fun wsInfo(): WebSocketInfoResponse {
 		val endpoints = mutableListOf("/ws/parkit")
+		if (rawWsEnabled) {
+			endpoints.add("/ws/parkit-raw")
+		}
 		val subscribe = mutableListOf("/topic/coaching")
 		if (mockEnabled) {
 			endpoints.add("/ws/parkit-mock")
