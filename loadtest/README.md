@@ -46,7 +46,8 @@ bash loadtest/scripts/produce_sensor_kcat.sh
 ```
 
 환경변수
-- `BOOTSTRAP` (default: `localhost:9092`)
+- `BOOTSTRAP` (default: 비어있음)
+  - 로컬에서 `docker-compose.loadtest.yml`을 쓴다면 기본값은 내부 리스너 `kafka:9094`를 사용합니다.
 - `TOPIC` (default: `sensor-topic`)
 - `SESSIONS` (default: `50`)
 - `INTERVAL_MS` (default: `500`) 세션별 발행 주기

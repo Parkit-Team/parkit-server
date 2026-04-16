@@ -1,7 +1,7 @@
 #!/usr/bin/env bash
 set -euo pipefail
 
-BOOTSTRAP=${BOOTSTRAP:-localhost:9092}
+BOOTSTRAP=${BOOTSTRAP:-}
 TOPIC=${TOPIC:-sensor-topic}
 SESSIONS=${SESSIONS:-50}
 INTERVAL_MS=${INTERVAL_MS:-500}
@@ -16,7 +16,11 @@ if ! docker compose version >/dev/null 2>&1; then
 	exit 1
 fi
 
-echo "Producing to $TOPIC @ $BOOTSTRAP"
+if [ -z "$BOOTSTRAP" ]; then
+	echo "Producing to $TOPIC (bootstrap=default from docker-compose)"
+else
+	echo "Producing to $TOPIC @ $BOOTSTRAP"
+fi
 echo "sessions=$SESSIONS interval_ms=$INTERVAL_MS"
 echo "Press Ctrl+C to stop."
 
