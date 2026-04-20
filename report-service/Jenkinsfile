@@ -6,6 +6,7 @@ pipeline {
         SERVICE_NAME = 'report-service'
         DOCKER_IMAGE_NAME = "parkitteam/${env.JOB_BASE_NAME.replace('-CI', '')}"
         DOCKER_TAG = "build-${env.BUILD_ID}"
+        GRADLE_USER_HOME = "${WORKSPACE}/.gradle"
     }
 
     tools {
@@ -49,7 +50,7 @@ pipeline {
                 // 폴더 이동 후 jar 생성
                 dir("${SERVICE_NAME}") {
                     echo "Building JAR for ${SERVICE_NAME}..."
-                    sh 'bash ./gradlew clean bootJar -x test' // db 연동 후 테스트 실행 예정
+                    sh 'bash ./gradlew --build-cache bootJar -x test' // db 연동 후 테스트 실행 예정
                 }
             }
         }
@@ -128,4 +129,3 @@ pipeline {
         }
     }
 }
-
