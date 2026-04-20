@@ -21,8 +21,20 @@ pipeline {
             }
         }
 
+        stage('Check Changes') {
+            when {
+                not { changeset "${SERVICE_NAME}/**" }
+            }
+            steps {
+                script {
+                    echo "${SERVICE_NAME} 폴더에 변경 사항이 없으므로 빌드를 스킵하고 파이프라인 상태를 ABORTED로 설정합니다."
+                    currentBuild.result = 'ABORTED'
+                }
+            }
+        }
+
         stage('Grant Permissions') {
-            when { changeset "analysis-service/**" }
+            when { changeset "${SERVICE_NAME}/**" }
             steps {
                 // gradlew 파일 실행 권한 부여
                 dir("${SERVICE_NAME}") {
@@ -32,7 +44,7 @@ pipeline {
         }
 
         stage('Test & Build Jar') {
-            when { changeset "analysis-service/**" }
+            when { changeset "${SERVICE_NAME}/**" }
             steps {
                 // 폴더 이동 후 build 실행
                 dir("${SERVICE_NAME}") {
@@ -43,7 +55,7 @@ pipeline {
         }
 
         stage('Build Docker Image') {
-            when { changeset "analysis-service/**" }
+            when { changeset "${SERVICE_NAME}/**" }
             steps {
                 // 폴더 이동 후 Docker image build
                 dir("${SERVICE_NAME}") {
@@ -54,7 +66,7 @@ pipeline {
         }
 
         stage('Push Docker Image') {
-            when { changeset "analysis-service/**" }
+            when { changeset "${SERVICE_NAME}/**" }
             steps {
                 // Docker Hub에 이미지를 푸시
                 echo 'Pushing Docker Image to Docker Hub registry...'
@@ -67,7 +79,7 @@ pipeline {
         }
         //변경이 생긴 경우 argocd-parkit 래포의 manifest 파일에서도 이미지 태그가 업데이트
         stage('Update K8s Manifests') {
-            when { changeset "analysis-service/**" }
+            when { changeset "${SERVICE_NAME}/**" }
             steps {
                 echo 'Updating image tag in argocd-parkit repository...'
                 withCredentials([usernamePassword(credentialsId: 'github-credentials', passwordVariable: 'GIT_PASSWORD', usernameVariable: 'GIT_USERNAME')]) {
@@ -92,6 +104,7 @@ pipeline {
             }
         }
         stage('Cleanup') {
+            when { changeset "${SERVICE_NAME}/**" }
             steps {
                 // 필요없는 도커 이미지 삭제
                 echo 'Pruning unused Docker images...'
@@ -109,6 +122,9 @@ pipeline {
         }
         failure {
             echo "Build Failed."
+        }
+        aborted {
+            echo "Build Aborted (No changes detected)."
         }
     }
 }
