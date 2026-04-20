@@ -21,6 +21,18 @@ pipeline {
             }
         }
 
+        stage('Check Changes') {
+            when {
+                not { changeset "analysis-service/**" }
+            }
+            steps {
+                script {
+                    echo "analysis-service 폴더에 변경 사항이 없으므로 빌드를 스킵하고 파이프라인 상태를 ABORTED로 설정합니다."
+                    currentBuild.result = 'ABORTED'
+                }
+            }
+        }
+
         stage('Grant Permissions') {
             when { changeset "analysis-service/**" }
             steps {
@@ -109,6 +121,9 @@ pipeline {
         }
         failure {
             echo "Build Failed."
+        }
+        aborted {
+            echo "Build Aborted (No changes detected)."
         }
     }
 }
