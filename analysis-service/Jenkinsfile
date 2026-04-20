@@ -43,13 +43,13 @@ pipeline {
             }
         }
 
-        stage('Test & Build Jar') {
+        stage('Build Jar') {
             when { changeset "${SERVICE_NAME}/**" }
             steps {
-                // 폴더 이동 후 build 실행
+                // 폴더 이동 후 jar 생성
                 dir("${SERVICE_NAME}") {
-                    echo "Running tests and building JAR for ${SERVICE_NAME}..."
-                    sh './gradlew clean build -x test' // 테스트 건너뛰기
+                    echo "Building JAR for ${SERVICE_NAME}..."
+                    sh 'bash ./gradlew clean bootJar -x test'
                 }
             }
         }
