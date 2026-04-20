@@ -1,6 +1,15 @@
 # Parkit
 실시간 주차 센서 데이터를 기반으로 주차 코칭 데이터를 생성하고, 클라이언트에 WebSocket(STOMP)으로 전달하는 마이크로서비스 레포입니다.
 
+
+
+https://github.com/user-attachments/assets/04a8bd32-9d5a-49a7-90c9-b135222fdd78
+
+
+
+
+
+
 ## Contributor
 ### [김리나](https://github.com/ri-naa)
 - Jenkins와 Docker를 활용하여 CI 자동화
