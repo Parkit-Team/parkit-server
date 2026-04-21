@@ -86,31 +86,33 @@ pipeline {
             steps {
                 echo 'Updating image tag in argocd-parkit repository...'
                 withCredentials([usernamePassword(credentialsId: 'github-credentials', passwordVariable: 'GIT_PASSWORD', usernameVariable: 'GIT_USERNAME')]) {
-                    sh '''
-                        if [ ! -d "argocd-parkit/.git" ]; then
-                            git clone "https://$GIT_USERNAME:$GIT_PASSWORD@github.com/Parkit-Team/argocd-parkit.git"
-                        fi
+                    retry(3) {
+                        sh '''
+                            if [ ! -d "argocd-parkit/.git" ]; then
+                                git clone "https://$GIT_USERNAME:$GIT_PASSWORD@github.com/Parkit-Team/argocd-parkit.git"
+                            fi
 
-                        cd argocd-parkit
-                        git remote set-url origin "https://$GIT_USERNAME:$GIT_PASSWORD@github.com/Parkit-Team/argocd-parkit.git"
-                        git fetch origin main
-                        git checkout -B main origin/main
+                            cd argocd-parkit
+                            git remote set-url origin "https://$GIT_USERNAME:$GIT_PASSWORD@github.com/Parkit-Team/argocd-parkit.git"
+                            git fetch origin main
+                            git checkout -B main origin/main
 
-                        sed -i "s|image: ${DOCKER_IMAGE_NAME}:.*|image: ${DOCKER_IMAGE_NAME}:${DOCKER_TAG}|g" \
-                            "${SERVICE_NAME}/deployment.yaml"
+                            sed -i "s|image: ${DOCKER_IMAGE_NAME}:.*|image: ${DOCKER_IMAGE_NAME}:${DOCKER_TAG}|g" \
+                                "${SERVICE_NAME}/deployment.yaml"
 
-                        git config user.email "jenkins@ci.com"
-                        git config user.name "Jenkins CI"
-                        git add "${SERVICE_NAME}/deployment.yaml"
+                            git config user.email "jenkins@ci.com"
+                            git config user.name "Jenkins CI"
+                            git add "${SERVICE_NAME}/deployment.yaml"
 
-                        if git diff --cached --quiet; then
-                            echo "Manifest already points to ${DOCKER_IMAGE_NAME}:${DOCKER_TAG}"
-                            exit 0
-                        fi
+                            if git diff --cached --quiet; then
+                                echo "Manifest already points to ${DOCKER_IMAGE_NAME}:${DOCKER_TAG}"
+                                exit 0
+                            fi
 
-                        git commit -m "[CI] Update ${SERVICE_NAME} image to ${DOCKER_TAG}"
-                        git push origin main
-                    '''
+                            git commit -m "[CI] Update ${SERVICE_NAME} image to ${DOCKER_TAG}"
+                            git push origin main
+                        '''
+                    }
                 }
             }
         }
