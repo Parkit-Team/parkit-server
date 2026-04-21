@@ -87,13 +87,14 @@ pipeline {
                 echo 'Updating image tag in argocd-parkit repository...'
                 withCredentials([usernamePassword(credentialsId: 'github-credentials', passwordVariable: 'GIT_PASSWORD', usernameVariable: 'GIT_USERNAME')]) {
                     sh '''
-                        rm -rf argocd-parkit
-                        git clone "https://$GIT_USERNAME:$GIT_PASSWORD@github.com/Parkit-Team/argocd-parkit.git"
+                        if [ ! -d "argocd-parkit/.git" ]; then
+                            git clone "https://$GIT_USERNAME:$GIT_PASSWORD@github.com/Parkit-Team/argocd-parkit.git"
+                        fi
 
                         cd argocd-parkit
+                        git remote set-url origin "https://$GIT_USERNAME:$GIT_PASSWORD@github.com/Parkit-Team/argocd-parkit.git"
                         git fetch origin main
-                        git checkout main
-                        git reset --hard origin/main
+                        git checkout -B main origin/main
 
                         sed -i "s|image: ${DOCKER_IMAGE_NAME}:.*|image: ${DOCKER_IMAGE_NAME}:${DOCKER_TAG}|g" \
                             "${SERVICE_NAME}/deployment.yaml"
