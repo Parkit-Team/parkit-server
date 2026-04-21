@@ -13,6 +13,8 @@ data class ObstacleDistancesDto(
 data class CoachingSocketDto(
     val step: Int,
     val timestamp: String,
+    val analysisReceivedAtEpochMs: Long,
+    val analysisEmittedAtEpochMs: Long,
     // units: angle=deg, distance=m
     val targetAngle: Int,
     val targetDistance: Double,

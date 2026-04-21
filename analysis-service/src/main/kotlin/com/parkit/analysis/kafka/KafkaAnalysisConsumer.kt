@@ -4,7 +4,7 @@ import com.fasterxml.jackson.databind.ObjectMapper
 import com.fasterxml.jackson.module.kotlin.readValue
 import com.parkit.analysis.coaching.service.RiskDetectionService
 import com.parkit.analysis.kafka.dto.ParkingSensorDto
-import com.parkit.analysis.kafka.mapper.toParkingEvent
+import com.parkit.analysis.parking.domain.ParkingEvent
 import com.parkit.analysis.parking.service.ParkingScoringService
 import org.apache.kafka.clients.consumer.ConsumerRecord
 import org.slf4j.LoggerFactory
@@ -31,17 +31,37 @@ class KafkaAnalysisConsumer(
 	fun consume(record: ConsumerRecord<String, String>) {
 		val sessionId = record.key() ?: "unknown-session"
 		val message = record.value()
+		val analysisReceivedAtEpochMs = System.currentTimeMillis()
 		
 		try {
 			log.debug("Received Kafka message for session {}: {}", sessionId, message)
 			val sensorDto = objectMapper.readValue(message, ParkingSensorDto::class.java)
-			val parkingEvent = sensorDto.toParkingEvent()
+			val parkingEvent = ParkingEvent(
+				time = sensorDto.time,
+				x = sensorDto.x,
+				y = sensorDto.y,
+				z = sensorDto.z,
+				handleAngle = sensorDto.handleAngle,
+				sensor = ParkingEvent.SensorData(
+					frontDistance = sensorDto.frontDist,
+					leftDistance = sensorDto.leftDist,
+					rightDistance = sensorDto.rightDist,
+					rearDistance = sensorDto.rearDist,
+					speed = sensorDto.speed,
+				),
+			)
 
 			// 세션별 순차 처리를 위해 동기 방식으로 처리
 			val result = parkingScoringService.processParkingEvent(sessionId, parkingEvent).block()
 			
 			if (result != null) {
-				val coaching = riskDetectionService.calculate(result.step, sensorDto, result.initialX, result.initialY)
+				val coaching = riskDetectionService.calculate(
+					result.step,
+					sensorDto,
+					result.initialX,
+					result.initialY,
+					analysisReceivedAtEpochMs,
+				)
 				val coachingJson = objectMapper.writeValueAsString(coaching)
 				
 				// Kafka 전송도 완료될 때까지 대기
