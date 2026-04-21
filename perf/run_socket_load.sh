@@ -5,7 +5,7 @@ set -euo pipefail
 ROOT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")/.." && pwd)"
 SOCKET_HOST="${SOCKET_HOST:?SOCKET_HOST is required}"
 SOCKET_PORT="${SOCKET_PORT:-8082}"
-STOMP_DESTINATION="${STOMP_DESTINATION:-/topic/coaching}"
+STOMP_DESTINATION="${STOMP_DESTINATION:-/topic/coaching-mock}"
 CLIENT_COUNT="${CLIENT_COUNT:-20}"
 DURATION_SECONDS="${DURATION_SECONDS:-30}"
 JAVA_HOME="${JAVA_HOME:-/usr/lib/jvm/java-17-openjdk-amd64}"

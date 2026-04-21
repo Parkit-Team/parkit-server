@@ -26,10 +26,7 @@ class CoachingEventConsumer(
 	fun consume(message: String) {
 		try {
 			val event = objectMapper.readValue<CoachingSocketDto>(message)
-			messagingTemplate.convertAndSend(
-				TOPIC_DESTINATION,
-				event.copy(socketForwardedAtEpochMs = System.currentTimeMillis()),
-			)
+			messagingTemplate.convertAndSend(TOPIC_DESTINATION, event)
 		} catch (e: Exception) {
 			log.error("Failed to process coaching-event message", e)
 		}

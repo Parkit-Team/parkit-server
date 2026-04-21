@@ -39,9 +39,6 @@ class CoachingScheduler(
 		val mockData = CoachingSocketDto(
 			step = 1,
 			timestamp = java.time.LocalDateTime.now().toString(),
-			analysisReceivedAtEpochMs = System.currentTimeMillis(),
-			analysisEmittedAtEpochMs = System.currentTimeMillis(),
-			socketForwardedAtEpochMs = System.currentTimeMillis(),
             targetAngle = 0,
             targetDistance = 1.0,
             currentAngle = 0,

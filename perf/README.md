@@ -1,30 +1,24 @@
 # Performance Test Guide
 
-이 디렉터리는 `parkit-server`의 세 서비스에 맞춘 부하테스트 자산을 모아둔 곳입니다.
+이 디렉터리는 `parkit-server`의 부하테스트 자산을 모아둔 곳입니다.
+
+원칙
+- 운영 클라이언트 DTO는 변경하지 않습니다.
+- WebSocket 부하테스트는 기본적으로 `socket-service`의 mock destination(`/topic/coaching-mock`)을 사용합니다.
+- 지연시간은 기존 공개 DTO의 `timestamp` 필드를 기준으로 근사 측정합니다.
 
 테스트 대상
 - `report-service`: HTTP API 지연시간과 에러율
 - `socket-service`: STOMP/WebSocket 브로드캐스트 지연시간
-- `analysis-service`: Kafka 입력부터 `socket-service` 브로드캐스트까지의 E2E 흐름
+- `analysis-service`: Kafka 센서 이벤트 발행 부하
 
 사전 조건
 - `k6` 설치
-- `kcat` 설치 (`analysis-service` E2E용)
+- `kcat` 설치
 - 대상 서비스 기동
-- `analysis-service`와 `socket-service` E2E 측정 시 Kafka와 Redis도 함께 기동
-
-권장 SLO 예시
-- `report-service`: `p95 http_req_duration < 500ms`, `error rate < 1%`
-- `socket-service`: `p95 socket_ws_delivery_latency_ms < 500ms`
-- `analysis-service` + `socket-service`: `p95 analysis_processing_latency_ms < 200ms`, `p95 socket_ws_delivery_latency_ms < 500ms`
+- `socket-service` mock 부하테스트 시 `parkit.mock.coaching.enabled=true`
 
 ## Report Service
-
-대상 엔드포인트
-- `POST /api/driving-sessions/start`
-- `POST /api/driving-sessions/{sessionId}/sensor-logs`
-- `GET /api/driving-sessions/{sessionId}/report`
-- `POST /api/driving-sessions/{sessionId}/stop`
 
 실행 예시
 
@@ -36,21 +30,17 @@ STAGE_2_TARGET=100 \
 ./perf/run_report_load.sh
 ```
 
-측정 포인트
+주요 메트릭
 - `http_req_duration`
 - `report_sensor_log_duration`
 - `report_fetch_duration`
 - `http_req_failed`
 
-주의
-- 현재 구현은 전역적으로 가장 최근 `RUNNING` 세션을 재사용합니다.
-- 따라서 `start` 자체의 동시성 성능보다, 센서 로그 적재와 조회 부하를 보는 용도로 해석하는 것이 맞습니다.
-
 ## Socket Service
 
-대상
-- SockJS websocket endpoint: `/ws/parkit/websocket`
-- STOMP subscribe destination: `/topic/coaching`
+기본 대상
+- SockJS endpoint: `/ws/parkit`
+- 기본 subscribe destination: `/topic/coaching-mock`
 
 실행 예시
 
@@ -61,17 +51,6 @@ DURATION_SECONDS=30 \
 ./perf/run_socket_load.sh
 ```
 
-측정 포인트
-- `analysis_processing_latency_ms`
-- `socket_broker_latency_ms`
-- `socket_ws_delivery_latency_ms`
-- `socket_valid_messages`
-
-해석
-- `analysis_processing_latency_ms`: `analysis-service`가 Kafka 레코드를 읽고 코칭 이벤트를 만든 시간
-- `socket_broker_latency_ms`: `analysis-service`가 Kafka에 보낸 뒤 `socket-service`가 브로드캐스트 직전까지 걸린 시간
-- `socket_ws_delivery_latency_ms`: `socket-service` 브로드캐스트 후 k6 클라이언트가 메시지를 받은 시간
-
 출력 예시
 
 ```text
@@ -79,32 +58,13 @@ clients=100 connected=100 failures=0 messages=31344
 avg_ms=308.65 p50_ms=15 p95_ms=2175 p99_ms=3165 max_ms=3882
 ```
 
-## Analysis Service E2E
+주의
+- `timestamp` 기반 근사 지연시간이므로 테스트 서버와 대상 서버의 시계가 크게 어긋나면 수치가 왜곡될 수 있습니다.
+- 운영 DTO 계약을 건드리지 않기 위해 mock channel 부하를 기본값으로 둡니다.
 
-대상
-- Kafka topic `sensor-topic`
-- `analysis-service` consumer
-- `socket-service` websocket broadcast
+## Analysis Service Publish Load
 
-실행 순서
-1. `analysis-service`, `socket-service`, Kafka, Redis를 기동합니다.
-2. WebSocket 구독 부하를 시작합니다.
-3. Kafka에 센서 이벤트를 발행합니다.
-4. `k6` 결과에서 `analysis_processing_latency_ms`, `socket_ws_delivery_latency_ms`를 확인합니다.
-
-원샷 실행 예시
-
-```bash
-KAFKA_BOOTSTRAP_SERVERS=localhost:9092 \
-SOCKET_WS_URL=ws://localhost:8082/ws/parkit/websocket \
-SESSION_COUNT=100 \
-REPEAT_COUNT=10 \
-STAGE_1_TARGET=50 \
-STAGE_2_TARGET=200 \
-./perf/run_analysis_e2e.sh
-```
-
-센서 이벤트만 별도 발행하고 싶다면:
+센서 이벤트를 Kafka `sensor-topic`으로 발행합니다.
 
 ```bash
 KAFKA_BOOTSTRAP_SERVERS=localhost:9092 \
@@ -114,9 +74,23 @@ EVENT_INTERVAL_MS=20 \
 ./perf/run_analysis_publish.sh
 ```
 
-## Ubuntu Quick Start
+이 스크립트는 실행 전에 CSV에서 `nan` 값을 제거한 정제본을 사용합니다.
 
-온프레미스 Ubuntu 서버에서는 아래 순서가 가장 단순합니다.
+## Optional E2E
+
+운영 DTO 변경 없이 `timestamp`만으로 근사 지연을 보려면:
+
+```bash
+SOCKET_WS_URL=ws://localhost:8082/ws/parkit/websocket \
+KAFKA_BOOTSTRAP_SERVERS=localhost:9092 \
+SESSION_COUNT=100 \
+REPEAT_COUNT=10 \
+STAGE_1_TARGET=20 \
+STAGE_2_TARGET=100 \
+./perf/run_analysis_e2e.sh
+```
+
+## Ubuntu Quick Start
 
 ```bash
 sudo apt update
@@ -134,33 +108,11 @@ cd parkit-server
 chmod +x perf/*.sh perf/analysis-service/*.sh
 ```
 
-산출물
-- `perf/results/analysis-socket-summary.json`
-- `perf/results/analysis-socket-k6.log`
-
-## Kubernetes / ArgoCD 환경 권장 방식
-
-운영 유사 환경에서는 다음 순서가 가장 안정적입니다.
-
-1. ArgoCD로 스테이징 환경에 서비스 배포
-2. Kafka, Redis, Mongo 상태를 동일하게 준비
-3. `k6`는 별도 runner Pod 또는 외부 runner에서 실행
-4. 결과는 `k6 summary + Prometheus + Grafana`로 같이 확인
-
-운영 체크 항목
-- CPU / memory usage
-- Kafka consumer lag
-- Redis command latency
-- Mongo write latency
-- WebSocket 연결 유지율
-
-## 결과 보고 형식
-
-부하테스트 결과는 아래 형식으로 남기면 됩니다.
+## 결과 기록 형식
 
 ```text
 대상: socket-service
-시나리오: 동시 300 구독자, 100 세션 x 10회 sensor-topic 발행
-결과: p95 analysis_processing_latency_ms=120ms, p95 socket_ws_delivery_latency_ms=210ms, error rate=0%
-판정: 목표(500ms 이하) 충족
+시나리오: 동시 100 구독자, 30초 mock coaching 수신
+결과: connected=100, failures=0, avg=xxx ms, p50=xxx ms, p95=xxx ms, p99=xxx ms, max=xxx ms
+판정: 목표 p95 500ms 충족/미충족
 ```

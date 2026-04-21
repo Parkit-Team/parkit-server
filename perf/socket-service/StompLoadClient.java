@@ -10,6 +10,8 @@ import org.springframework.web.socket.sockjs.client.Transport;
 import org.springframework.web.socket.sockjs.client.WebSocketTransport;
 
 import java.lang.reflect.Type;
+import java.time.LocalDateTime;
+import java.time.ZoneId;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
@@ -57,11 +59,11 @@ public class StompLoadClient {
 								return;
 							}
 
-							Long forwardedAt = readLong(body, "socketForwardedAtEpochMs");
-							Long emittedAt = readLong(body, "analysisEmittedAtEpochMs");
-							long basis = forwardedAt != null ? forwardedAt : emittedAt != null ? emittedAt : System.currentTimeMillis();
-							long latency = System.currentTimeMillis() - basis;
-							latencies.add(latency);
+							Long messageTimestamp = readTimestamp(body);
+							if (messageTimestamp != null) {
+								long latency = System.currentTimeMillis() - messageTimestamp;
+								latencies.add(latency);
+							}
 							messageCount.incrementAndGet();
 						}
 					});
@@ -129,15 +131,19 @@ public class StompLoadClient {
 		return values.get(index);
 	}
 
-	private static Long readLong(Map<?, ?> body, String key) {
-		Object value = body.get(key);
-		if (value instanceof Number number) {
-			return number.longValue();
+	private static Long readTimestamp(Map<?, ?> body) {
+		Object value = body.get("timestamp");
+		if (!(value instanceof String timestamp) || timestamp.isBlank()) {
+			return null;
 		}
-		if (value instanceof String stringValue && !stringValue.isBlank()) {
-			return Long.parseLong(stringValue);
+		try {
+			return LocalDateTime.parse(timestamp)
+				.atZone(ZoneId.systemDefault())
+				.toInstant()
+				.toEpochMilli();
+		} catch (Exception ignored) {
+			return null;
 		}
-		return null;
 	}
 
 	private static String env(String key, String defaultValue) {

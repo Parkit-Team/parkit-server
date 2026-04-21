@@ -3,14 +3,12 @@ import { check, sleep } from 'k6';
 import { Counter, Rate, Trend } from 'k6/metrics';
 
 const wsBaseUrl = __ENV.SOCKET_WS_URL || 'ws://localhost:8082/ws/parkit/websocket';
-const subscribeDestination = __ENV.STOMP_SUBSCRIBE_DESTINATION || '/topic/coaching';
+const subscribeDestination = __ENV.STOMP_SUBSCRIBE_DESTINATION || '/topic/coaching-mock';
 const testDurationMs = Number(__ENV.TEST_DURATION_MS || 60000);
 
 const connectFailures = new Counter('socket_connect_failures');
 const stompFramesReceived = new Counter('socket_stomp_frames_received');
 const wsDeliveryLatency = new Trend('socket_ws_delivery_latency_ms', true);
-const socketBrokerLatency = new Trend('socket_broker_latency_ms', true);
-const analysisProcessingLatency = new Trend('analysis_processing_latency_ms', true);
 const validMessages = new Rate('socket_valid_messages');
 
 export const options = {
@@ -98,18 +96,10 @@ export function subscribe() {
 
 				const payload = JSON.parse(body);
 				const now = Date.now();
-				const analysisReceivedAt = Number(payload.analysisReceivedAtEpochMs);
-				const analysisEmittedAt = Number(payload.analysisEmittedAtEpochMs);
-				const socketForwardedAt = Number(payload.socketForwardedAtEpochMs);
+				const messageTimestamp = Date.parse(payload.timestamp);
 
-				if (
-					Number.isFinite(analysisReceivedAt) &&
-					Number.isFinite(analysisEmittedAt) &&
-					Number.isFinite(socketForwardedAt)
-				) {
-					analysisProcessingLatency.add(analysisEmittedAt - analysisReceivedAt);
-					socketBrokerLatency.add(socketForwardedAt - analysisEmittedAt);
-					wsDeliveryLatency.add(now - socketForwardedAt);
+				if (Number.isFinite(messageTimestamp)) {
+					wsDeliveryLatency.add(now - messageTimestamp);
 					validMessages.add(true);
 				} else {
 					validMessages.add(false);

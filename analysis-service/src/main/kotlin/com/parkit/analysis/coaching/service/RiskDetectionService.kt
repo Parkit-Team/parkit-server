@@ -21,23 +21,11 @@ class RiskDetectionService(
     /**
      * 주행 이벤트를 기반으로 코칭 이벤트를 계산합니다.
      */
-	fun calculate(
-		step: Int,
-		event: ParkingSensorDto,
-		initialX: Double? = null,
-		initialY: Double? = null,
-		analysisReceivedAtEpochMs: Long = System.currentTimeMillis(),
-	): CoachingSocketDto {
-		return createCoachingEvent(step, event, initialX, initialY, analysisReceivedAtEpochMs)
+	fun calculate(step: Int, event: ParkingSensorDto, initialX: Double? = null, initialY: Double? = null): CoachingSocketDto {
+		return createCoachingEvent(step, event, initialX, initialY)
     }
 
-	private fun createCoachingEvent(
-		step: Int,
-		event: ParkingSensorDto,
-		initialX: Double?,
-		initialY: Double?,
-		analysisReceivedAtEpochMs: Long,
-	): CoachingSocketDto {
+	private fun createCoachingEvent(step: Int, event: ParkingSensorDto, initialX: Double?, initialY: Double?): CoachingSocketDto {
 		val targetAngleDeg = ParkingReference.coachingTargetAngleDeg(step)
 		val targetDistanceM = ParkingReference.coachingTargetMoveDistanceM(step, initialX)
 		
@@ -65,13 +53,9 @@ class RiskDetectionService(
 			else -> 5
 		}
 
-		val analysisEmittedAtEpochMs = System.currentTimeMillis()
-
 		return CoachingSocketDto(
             step = step,
             timestamp = java.time.LocalDateTime.now().toString(),
-			analysisReceivedAtEpochMs = analysisReceivedAtEpochMs,
-			analysisEmittedAtEpochMs = analysisEmittedAtEpochMs,
 			targetAngle = targetAngleDeg,
 			targetDistance = (targetDistanceM * 10).roundToInt() / 10.0,
 			currentAngle = event.handleAngle.roundToInt(),

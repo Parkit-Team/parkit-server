@@ -23,12 +23,6 @@ data class CoachingSocketDto(
 	val step: Int,
 	@field:Schema(description = "타임스탬프 (RFC3333/ISO-8601)")
 	val timestamp: String,
-	@field:Schema(description = "analysis-service가 Kafka 레코드를 읽은 시각(epoch ms)")
-	val analysisReceivedAtEpochMs: Long,
-	@field:Schema(description = "analysis-service가 Kafka로 코칭 이벤트를 보낸 시각(epoch ms)")
-	val analysisEmittedAtEpochMs: Long,
-	@field:Schema(description = "socket-service가 WebSocket 브로드캐스트 직전 기록한 시각(epoch ms)")
-	val socketForwardedAtEpochMs: Long? = null,
     @field:Schema(description = "목표 각도(deg)")
     val targetAngle: Int,
     @field:Schema(description = "목표 이동 거리(m)")
