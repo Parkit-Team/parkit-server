@@ -29,12 +29,11 @@
 실행 예시
 
 ```bash
-k6 run \
-  -e REPORT_BASE_URL=http://localhost:8083 \
-  -e SENSOR_LOGS_PER_ITERATION=50 \
-  -e STAGE_1_TARGET=20 \
-  -e STAGE_2_TARGET=100 \
-  perf/report-service/driving-session-load.js
+REPORT_BASE_URL=http://localhost:8083 \
+SENSOR_LOGS_PER_ITERATION=50 \
+STAGE_1_TARGET=20 \
+STAGE_2_TARGET=100 \
+./perf/run_report_load.sh
 ```
 
 측정 포인트
@@ -56,12 +55,10 @@ k6 run \
 실행 예시
 
 ```bash
-k6 run \
-  -e SOCKET_WS_URL=ws://localhost:8082/ws/parkit/websocket \
-  -e STAGE_1_TARGET=50 \
-  -e STAGE_2_TARGET=300 \
-  -e TEST_DURATION_MS=120000 \
-  perf/socket-service/stomp-broadcast-load.js
+SOCKET_HOST=localhost \
+CLIENT_COUNT=100 \
+DURATION_SECONDS=30 \
+./perf/run_socket_load.sh
 ```
 
 측정 포인트
@@ -74,6 +71,13 @@ k6 run \
 - `analysis_processing_latency_ms`: `analysis-service`가 Kafka 레코드를 읽고 코칭 이벤트를 만든 시간
 - `socket_broker_latency_ms`: `analysis-service`가 Kafka에 보낸 뒤 `socket-service`가 브로드캐스트 직전까지 걸린 시간
 - `socket_ws_delivery_latency_ms`: `socket-service` 브로드캐스트 후 k6 클라이언트가 메시지를 받은 시간
+
+출력 예시
+
+```text
+clients=100 connected=100 failures=0 messages=31344
+avg_ms=308.65 p50_ms=15 p95_ms=2175 p99_ms=3165 max_ms=3882
+```
 
 ## Analysis Service E2E
 
@@ -97,7 +101,7 @@ SESSION_COUNT=100 \
 REPEAT_COUNT=10 \
 STAGE_1_TARGET=50 \
 STAGE_2_TARGET=200 \
-perf/analysis-service/run-e2e-latency.sh
+./perf/run_analysis_e2e.sh
 ```
 
 센서 이벤트만 별도 발행하고 싶다면:
@@ -107,7 +111,27 @@ KAFKA_BOOTSTRAP_SERVERS=localhost:9092 \
 SESSION_COUNT=100 \
 REPEAT_COUNT=10 \
 EVENT_INTERVAL_MS=20 \
-perf/analysis-service/publish-sensor-topic.sh
+./perf/run_analysis_publish.sh
+```
+
+## Ubuntu Quick Start
+
+온프레미스 Ubuntu 서버에서는 아래 순서가 가장 단순합니다.
+
+```bash
+sudo apt update
+sudo apt install -y git curl jq openjdk-17-jdk kcat
+sudo mkdir -p /etc/apt/keyrings
+curl -fsSL https://dl.k6.io/key.gpg | sudo gpg --dearmor -o /etc/apt/keyrings/k6.gpg
+echo "deb [signed-by=/etc/apt/keyrings/k6.gpg] https://dl.k6.io/deb stable main" | sudo tee /etc/apt/sources.list.d/k6.list
+sudo apt update
+sudo apt install -y k6
+```
+
+```bash
+git clone https://github.com/Parkit-Team/parkit-server.git
+cd parkit-server
+chmod +x perf/*.sh perf/analysis-service/*.sh
 ```
 
 산출물
