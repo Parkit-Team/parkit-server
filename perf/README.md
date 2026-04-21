@@ -108,6 +108,117 @@ cd parkit-server
 chmod +x perf/*.sh perf/analysis-service/*.sh
 ```
 
+## SSH Quick Start
+
+온프레미스 서버를 직접 만지지 않고 SSH로 접속해도 괜찮습니다.
+중요한 것은 부하테스트 명령이 "온프레미스 서버 내부"에서 실행되는지입니다.
+
+### 1. SSH 접속
+
+```bash
+ssh <user>@<onprem-host>
+```
+
+긴 테스트는 `tmux`를 권장합니다.
+
+```bash
+tmux new -s loadtest
+```
+
+### 2. 최신 코드 반영
+
+```bash
+cd ~/parkit-server
+git checkout main
+git pull origin main
+chmod +x perf/*.sh perf/analysis-service/*.sh
+```
+
+아직 저장소를 받지 않았다면:
+
+```bash
+git clone https://github.com/Parkit-Team/parkit-server.git ~/parkit-server
+cd ~/parkit-server
+chmod +x perf/*.sh perf/analysis-service/*.sh
+```
+
+### 3. socket-service 부하테스트
+
+20명:
+
+```bash
+SOCKET_HOST=<socket-service-host> \
+CLIENT_COUNT=20 \
+DURATION_SECONDS=30 \
+JAVA_HOME=/usr/lib/jvm/java-17-openjdk-amd64 \
+./perf/run_socket_load.sh | tee socket_20.txt
+```
+
+50명:
+
+```bash
+SOCKET_HOST=<socket-service-host> \
+CLIENT_COUNT=50 \
+DURATION_SECONDS=30 \
+JAVA_HOME=/usr/lib/jvm/java-17-openjdk-amd64 \
+./perf/run_socket_load.sh | tee socket_50.txt
+```
+
+100명:
+
+```bash
+SOCKET_HOST=<socket-service-host> \
+CLIENT_COUNT=100 \
+DURATION_SECONDS=30 \
+JAVA_HOME=/usr/lib/jvm/java-17-openjdk-amd64 \
+./perf/run_socket_load.sh | tee socket_100.txt
+```
+
+필요하면 150명, 200명도 같은 방식으로 반복합니다.
+
+### 4. report-service HTTP 부하테스트
+
+```bash
+REPORT_BASE_URL=http://<report-service-host>:8083 \
+SENSOR_LOGS_PER_ITERATION=50 \
+STAGE_1_TARGET=20 \
+STAGE_2_TARGET=100 \
+./perf/run_report_load.sh | tee report_load.txt
+```
+
+### 5. analysis-service Kafka 발행 부하
+
+```bash
+KAFKA_BOOTSTRAP_SERVERS=<kafka-host>:9092 \
+SESSION_COUNT=100 \
+REPEAT_COUNT=10 \
+EVENT_INTERVAL_MS=20 \
+./perf/run_analysis_publish.sh | tee analysis_publish.txt
+```
+
+### 6. analysis + socket 근사 E2E
+
+```bash
+SOCKET_WS_URL=ws://<socket-service-host>:8082/ws/parkit/websocket \
+KAFKA_BOOTSTRAP_SERVERS=<kafka-host>:9092 \
+SESSION_COUNT=100 \
+REPEAT_COUNT=10 \
+STAGE_1_TARGET=20 \
+STAGE_2_TARGET=100 \
+./perf/run_analysis_e2e.sh | tee analysis_e2e.txt
+```
+
+### 7. 결과 수집
+
+`socket-service` 테스트 결과는 표 형태로 정리하면 됩니다.
+
+```text
+대상: socket-service
+시나리오: 동시 100 구독자, 30초 mock coaching 수신
+결과: connected=100, failures=0, avg=xxx ms, p50=xxx ms, p95=xxx ms, p99=xxx ms, max=xxx ms
+판정: 목표 p95 500ms 충족/미충족
+```
+
 ## 결과 기록 형식
 
 ```text
