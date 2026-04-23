@@ -6,6 +6,7 @@
 - 운영 클라이언트 DTO는 변경하지 않습니다.
 - WebSocket 부하테스트는 기본적으로 `socket-service`의 mock destination(`/topic/coaching-mock`)을 사용합니다.
 - 지연시간은 기존 공개 DTO의 `timestamp` 필드를 기준으로 근사 측정합니다.
+- CSV의 `time` 컬럼은 실제 시각이 아니라 0초 기준 상대 시뮬레이션 시간입니다.
 
 테스트 대상
 - `report-service`: HTTP API 지연시간과 에러율
@@ -56,6 +57,7 @@ Ingress나 Gateway가 서비스 앞에 있고 path prefix가 붙는 환경에서
 ```bash
 STOMP_ENDPOINT=http://192.168.201.98:50030/socket/ws/parkit \
 STOMP_DESTINATION=/topic/coaching \
+TIMESTAMP_ZONE=UTC \
 CLIENT_COUNT=100 \
 DURATION_SECONDS=30 \
 ./perf/run_socket_load.sh
@@ -70,6 +72,8 @@ avg_ms=308.65 p50_ms=15 p95_ms=2175 p99_ms=3165 max_ms=3882
 
 주의
 - `timestamp` 기반 근사 지연시간이므로 테스트 서버와 대상 서버의 시계가 크게 어긋나면 수치가 왜곡될 수 있습니다.
+- Kubernetes pod가 timezone 없는 `LocalDateTime`을 UTC 기준으로 생성하는 환경에서는 `TIMESTAMP_ZONE=UTC`로 실행합니다.
+- CSV의 `time`은 센서 시뮬레이션 상대시간이며, WebSocket 지연시간은 `analysis-service`가 코칭 메시지를 만든 `timestamp` 기준으로 계산합니다.
 - 운영 DTO 계약을 건드리지 않기 위해 mock channel 부하를 기본값으로 둡니다.
 
 ## Analysis Service Publish Load
@@ -158,6 +162,7 @@ chmod +x perf/*.sh perf/analysis-service/*.sh
 
 ```bash
 STOMP_ENDPOINT=http://<socket-service-host>:8082/ws/parkit \
+TIMESTAMP_ZONE=UTC \
 CLIENT_COUNT=20 \
 DURATION_SECONDS=30 \
 JAVA_HOME=/usr/lib/jvm/java-17-openjdk-amd64 \
@@ -168,6 +173,7 @@ JAVA_HOME=/usr/lib/jvm/java-17-openjdk-amd64 \
 
 ```bash
 STOMP_ENDPOINT=http://<socket-service-host>:8082/ws/parkit \
+TIMESTAMP_ZONE=UTC \
 CLIENT_COUNT=50 \
 DURATION_SECONDS=30 \
 JAVA_HOME=/usr/lib/jvm/java-17-openjdk-amd64 \
@@ -178,6 +184,7 @@ JAVA_HOME=/usr/lib/jvm/java-17-openjdk-amd64 \
 
 ```bash
 STOMP_ENDPOINT=http://<socket-service-host>:8082/ws/parkit \
+TIMESTAMP_ZONE=UTC \
 CLIENT_COUNT=100 \
 DURATION_SECONDS=30 \
 JAVA_HOME=/usr/lib/jvm/java-17-openjdk-amd64 \

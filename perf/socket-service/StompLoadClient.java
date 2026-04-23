@@ -26,6 +26,7 @@ public class StompLoadClient {
 	public static void main(String[] args) throws Exception {
 		String endpoint = env("STOMP_ENDPOINT", "ws://127.0.0.1:8082/ws/parkit");
 		String destination = env("STOMP_DESTINATION", "/topic/coaching-mock");
+		ZoneId timestampZone = ZoneId.of(env("TIMESTAMP_ZONE", "UTC"));
 		int clientCount = Integer.parseInt(env("CLIENT_COUNT", "100"));
 		int durationSeconds = Integer.parseInt(env("DURATION_SECONDS", "30"));
 		int connectTimeoutSeconds = Integer.parseInt(env("CONNECT_TIMEOUT_SECONDS", "30"));
@@ -59,7 +60,7 @@ public class StompLoadClient {
 								return;
 							}
 
-							Long messageTimestamp = readTimestamp(body);
+							Long messageTimestamp = readTimestamp(body, timestampZone);
 							if (messageTimestamp != null) {
 								long latency = System.currentTimeMillis() - messageTimestamp;
 								latencies.add(latency);
@@ -131,14 +132,14 @@ public class StompLoadClient {
 		return values.get(index);
 	}
 
-	private static Long readTimestamp(Map<?, ?> body) {
+	private static Long readTimestamp(Map<?, ?> body, ZoneId timestampZone) {
 		Object value = body.get("timestamp");
 		if (!(value instanceof String timestamp) || timestamp.isBlank()) {
 			return null;
 		}
 		try {
 			return LocalDateTime.parse(timestamp)
-				.atZone(ZoneId.systemDefault())
+				.atZone(timestampZone)
 				.toInstant()
 				.toEpochMilli();
 		} catch (Exception ignored) {

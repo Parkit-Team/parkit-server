@@ -24,7 +24,7 @@ if [[ ! -f "${SOCKET_CP_FILE}" ]]; then
 	find ~/.gradle/caches/modules-2/files-2.1 -name '*.jar' | paste -sd: - > "${SOCKET_CP_FILE}"
 fi
 
-if [[ ! -f perf/socket-service/StompLoadClient.class ]]; then
+if [[ ! -f perf/socket-service/StompLoadClient.class || perf/socket-service/StompLoadClient.java -nt perf/socket-service/StompLoadClient.class ]]; then
 	javac -cp "$(cat "${SOCKET_CP_FILE}")" perf/socket-service/StompLoadClient.java
 fi
 
