@@ -51,6 +51,16 @@ DURATION_SECONDS=30 \
 ./perf/run_socket_load.sh
 ```
 
+Ingress나 Gateway가 서비스 앞에 있고 path prefix가 붙는 환경에서는 `STOMP_ENDPOINT`를 직접 지정합니다.
+
+```bash
+STOMP_ENDPOINT=ws://192.168.201.98:50030/socket/ws/parkit/websocket \
+STOMP_DESTINATION=/topic/coaching \
+CLIENT_COUNT=100 \
+DURATION_SECONDS=30 \
+./perf/run_socket_load.sh
+```
+
 출력 예시
 
 ```text
@@ -147,7 +157,7 @@ chmod +x perf/*.sh perf/analysis-service/*.sh
 20명:
 
 ```bash
-SOCKET_HOST=<socket-service-host> \
+STOMP_ENDPOINT=ws://<socket-service-host>:8082/ws/parkit/websocket \
 CLIENT_COUNT=20 \
 DURATION_SECONDS=30 \
 JAVA_HOME=/usr/lib/jvm/java-17-openjdk-amd64 \
@@ -157,7 +167,7 @@ JAVA_HOME=/usr/lib/jvm/java-17-openjdk-amd64 \
 50명:
 
 ```bash
-SOCKET_HOST=<socket-service-host> \
+STOMP_ENDPOINT=ws://<socket-service-host>:8082/ws/parkit/websocket \
 CLIENT_COUNT=50 \
 DURATION_SECONDS=30 \
 JAVA_HOME=/usr/lib/jvm/java-17-openjdk-amd64 \
@@ -167,7 +177,7 @@ JAVA_HOME=/usr/lib/jvm/java-17-openjdk-amd64 \
 100명:
 
 ```bash
-SOCKET_HOST=<socket-service-host> \
+STOMP_ENDPOINT=ws://<socket-service-host>:8082/ws/parkit/websocket \
 CLIENT_COUNT=100 \
 DURATION_SECONDS=30 \
 JAVA_HOME=/usr/lib/jvm/java-17-openjdk-amd64 \

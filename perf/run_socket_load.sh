@@ -3,8 +3,9 @@
 set -euo pipefail
 
 ROOT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")/.." && pwd)"
-SOCKET_HOST="${SOCKET_HOST:?SOCKET_HOST is required}"
+SOCKET_HOST="${SOCKET_HOST:-localhost}"
 SOCKET_PORT="${SOCKET_PORT:-8082}"
+STOMP_ENDPOINT="${STOMP_ENDPOINT:-http://${SOCKET_HOST}:${SOCKET_PORT}/ws/parkit}"
 STOMP_DESTINATION="${STOMP_DESTINATION:-/topic/coaching-mock}"
 CLIENT_COUNT="${CLIENT_COUNT:-20}"
 DURATION_SECONDS="${DURATION_SECONDS:-30}"
@@ -27,7 +28,7 @@ if [[ ! -f perf/socket-service/StompLoadClient.class ]]; then
 	javac -cp "$(cat "${SOCKET_CP_FILE}")" perf/socket-service/StompLoadClient.java
 fi
 
-STOMP_ENDPOINT="http://${SOCKET_HOST}:${SOCKET_PORT}/ws/parkit" \
+STOMP_ENDPOINT="${STOMP_ENDPOINT}" \
 STOMP_DESTINATION="${STOMP_DESTINATION}" \
 CLIENT_COUNT="${CLIENT_COUNT}" \
 DURATION_SECONDS="${DURATION_SECONDS}" \
